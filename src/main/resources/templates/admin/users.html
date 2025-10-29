@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role">Admin</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users" class="active">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/products">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-people"></i> Quản lý Người dùng</h2>
+                    <p class="text-muted mb-0">Tổng số: <span id="totalUsers">0</span> người dùng</p>
+                </div>
+                <button class="btn btn-primary" onclick="openCreateUserModal()">
+                    <i class="bi bi-person-plus"></i> Tạo tài khoản mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm email, tên...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="roleFilter" onchange="filterUsers()">
+                            <option value="">Tất cả vai trò</option>
+                            <option value="CUSTOMER">Khách hàng</option>
+                            <option value="STAFF_PRODUCT">Nhân viên SP</option>
+                            <option value="STAFF_SALES">Nhân viên BH</option>
+                            <option value="ADMIN">Quản trị viên</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter" onchange="filterUsers()">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Bị khóa</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="filterUsers()">
+                            <i class="bi bi-search"></i> Tìm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Họ tên</th>
+                                <th>SĐT</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Đăng nhập cuối</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tạo/Sửa User -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">Tạo tài khoản mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="userEmail" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mật khẩu <span class="text-danger" id="passwordRequired">*</span></label>
+                                <input type="password" class="form-control" id="userPassword">
+                                <small class="text-muted" id="passwordHint">Tối thiểu 6 ký tự</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="userFullName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="userPhone">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Địa chỉ</label>
+                                <textarea class="form-control" id="userAddress" rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Vai trò <span class="text-danger">*</span></label>
+                                <div id="rolesCheckboxes">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="CUSTOMER" id="roleCustomer">
+                                        <label class="form-check-label" for="roleCustomer">
+                                            Khách hàng (CUSTOMER)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="STAFF_PRODUCT" id="roleStaffProduct">
+                                        <label class="form-check-label" for="roleStaffProduct">
+                                            Nhân viên sản phẩm (STAFF_PRODUCT)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="STAFF_SALES" id="roleStaffSales">
+                                        <label class="form-check-label" for="roleStaffSales">
+                                            Nhân viên bán hàng (STAFF_SALES)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="ADMIN" id="roleAdmin">
+                                        <label class="form-check-label" for="roleAdmin">
+                                            Quản trị viên (ADMIN)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Trạng thái</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="userIsActive" checked>
+                                    <label class="form-check-label" for="userIsActive">
+                                        Tài khoản hoạt động
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">
+                        <i class="bi bi-save"></i> Lưu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        checkAdminAccess();
+
+        const user = getUser();
+        if (user) {
+            document.getElementById('userInfo').innerHTML = `
+                <strong>${user.fullName || user.username}</strong><br>
+                <small class="badge bg-warning">ADMIN</small>
+            `;
+        }
+
+        let allUsers = [];
+
+        loadUsers();
+
+        async function loadUsers() {
+            try {
+                const response = await fetchWithAuth('/api/users');
+                if (response.ok) {
+                    allUsers = await response.json();
+                    displayUsers(allUsers);
+                } else {
+                    showError('Không thể tải danh sách người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showError('Có lỗi xảy ra khi tải danh sách người dùng');
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            document.getElementById('totalUsers').textContent = users.length;
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">Không có người dùng nào</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = users.map(u => {
+                const rolesArray = Array.isArray(u.roles) ? u.roles : Array.from(u.roles || []);
+
+                return `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td>${u.email}</td>
+                        <td>${u.fullName || 'N/A'}</td>
+                        <td>${u.phone || 'N/A'}</td>
+                        <td>${rolesArray.map(r => `<span class="badge bg-info">${r}</span>`).join(' ')}</td>
+                        <td>
+                            ${u.isActive
+                                ? '<span class="badge bg-success">Hoạt động</span>'
+                                : '<span class="badge bg-danger">Bị khóa</span>'}
+                        </td>
+                        <td>${u.lastLoginAt ? formatDate(u.lastLoginAt) : 'Chưa đăng nhập'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary"
+                                    onclick="openEditUserModal(${u.id})"
+                                    title="Sửa thông tin">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info"
+                                    onclick="resetPassword(${u.id}, '${u.email.replace(/'/g, "\\'")}')"
+                                    title="Cấp lại mật khẩu">
+                                <i class="bi bi-key"></i>
+                            </button>
+                            <button class="btn btn-sm btn-${u.isActive ? 'warning' : 'success'}"
+                                    onclick="toggleUserStatus(${u.id}, ${!u.isActive})"
+                                    title="${u.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}">
+                                <i class="bi bi-${u.isActive ? 'lock' : 'unlock'}"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger"
+                                    onclick="deleteUser(${u.id}, '${u.email.replace(/'/g, "\\'")}')"
+                                    title="Xóa người dùng">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterUsers() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const role = document.getElementById('roleFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            let filtered = allUsers.filter(u => {
+                const matchSearch = !searchText ||
+                    u.email.toLowerCase().includes(searchText) ||
+                    (u.fullName && u.fullName.toLowerCase().includes(searchText));
+
+                const rolesArray = Array.isArray(u.roles) ? u.roles : Array.from(u.roles || []);
+                const matchRole = !role || rolesArray.includes(role);
+                const matchStatus = !status || u.isActive.toString() === status;
+
+                return matchSearch && matchRole && matchStatus;
+            });
+
+            displayUsers(filtered);
+        }
+
+        async function toggleUserStatus(id, newStatus) {
+            const action = newStatus ? 'mở khóa' : 'khóa';
+            if (!confirm(`Bạn có chắc chắn muốn ${action} người dùng này?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/users/${id}/status`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ active: newStatus })  // Changed from 'isActive' to 'active'
+                });
+
+                if (response.ok) {
+                    alert(`${action.charAt(0).toUpperCase() + action.slice(1)} người dùng thành công!`);
+                    loadUsers();
+                } else {
+                    const error = await response.json();
+                    // Check if there are validation errors
+                    if (error.validationErrors && Object.keys(error.validationErrors).length > 0) {
+                        let errorMessage = 'Lỗi nhập liệu:\n';
+                        for (const [field, message] of Object.entries(error.validationErrors)) {
+                            errorMessage += `- ${message}\n`;
+                        }
+                        alert(errorMessage);
+                    } else {
+                        alert('Không thể cập nhật trạng thái người dùng: ' + (error.message || 'Lỗi không xác định'));
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating user status:', error);
+                alert('Có lỗi xảy ra khi cập nhật trạng thái!');
+            }
+        }
+
+        async function deleteUser(id, email) {
+            if (!confirm(`Bạn có chắc chắn muốn XÓA VĨNH VIỄN người dùng "${email}"?\n\nCảnh báo: Hành động này KHÔNG THỂ hoàn tác!`)) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/users/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Xóa người dùng thành công!');
+                    loadUsers();
+                } else {
+                    const error = await response.json();
+                    alert('Không thể xóa người dùng: ' + (error.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Có lỗi xảy ra khi xóa người dùng!');
+            }
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">${message}</td></tr>`;
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') filterUsers();
+        });
+
+        function openCreateUserModal() {
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('userModalTitle').textContent = 'Tạo tài khoản mới';
+            document.getElementById('passwordRequired').style.display = 'inline';
+            document.getElementById('passwordHint').style.display = 'inline';
+            document.getElementById('roleAdmin').checked = false;
+            document.getElementById('userIsActive').checked = true;
+            const checkboxes = document.querySelectorAll('#rolesCheckboxes .form-check-input');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                checkbox.removeAttribute('disabled');
+            });
+            const statusLabel = document.querySelector('label[for="userIsActive"]');
+            statusLabel.textContent = 'Tài khoản hoạt động';
+            const submitButton = document.querySelector('#userModal .btn-primary');
+            submitButton.setAttribute('onclick', 'saveUser()');
+            submitButton.innerHTML = '<i class="bi bi-save"></i> Lưu';
+            const modal = new bootstrap.Modal(document.getElementById('userModal'));
+            modal.show();
+        }
+
+        function openEditUserModal(id) {
+            const user = allUsers.find(u => u.id === id);
+            if (!user) return alert('Người dùng không tồn tại');
+
+            document.getElementById('userId').value = user.id;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userFullName').value = user.fullName || '';
+            document.getElementById('userPhone').value = user.phone || '';
+            document.getElementById('userAddress').value = user.address || '';
+            document.getElementById('userIsActive').checked = user.isActive;
+
+            const roles = Array.isArray(user.roles) ? user.roles : Array.from(user.roles || []);
+            const checkboxes = document.querySelectorAll('#rolesCheckboxes .form-check-input');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = roles.includes(checkbox.value);
+                checkbox.removeAttribute('disabled');
+            });
+
+            document.getElementById('userModalTitle').textContent = 'Sửa thông tin người dùng';
+            document.getElementById('passwordRequired').style.display = 'none';
+            document.getElementById('passwordHint').style.display = 'none';
+
+            const submitButton = document.querySelector('#userModal .btn-primary');
+            submitButton.setAttribute('onclick', 'updateUser()');
+            submitButton.innerHTML = '<i class="bi bi-pencil"></i> Cập nhật';
+
+            const modal = new bootstrap.Modal(document.getElementById('userModal'));
+            modal.show();
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('userId').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const fullName = document.getElementById('userFullName').value;
+            const phone = document.getElementById('userPhone').value;
+            const address = document.getElementById('userAddress').value;
+            const isActive = document.getElementById('userIsActive').checked;
+            const roles = Array.from(document.querySelectorAll('#rolesCheckboxes .form-check-input:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (!email || !fullName) {
+                return alert('Email và họ tên là bắt buộc!');
+            }
+
+            if (password.length < 6) {
+                return alert('Mật khẩu phải có ít nhất 6 ký tự!');
+            }
+
+            const userData = {
+                email,
+                password,
+                fullName,
+                phone,
+                address,
+                isActive,
+                roles
+            };
+
+            try {
+                const response = id
+                    ? await fetchWithAuth(`/api/users/${id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(userData)
+                    })
+                    : await fetchWithAuth('/api/users', {
+                        method: 'POST',
+                        body: JSON.stringify(userData)
+                    });
+
+                if (response.ok) {
+                    alert('Lưu người dùng thành công!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
+                    modal.hide();
+                    loadUsers();
+                } else {
+                    const error = await response.json();
+                    alert('Không thể lưu người dùng: ' + (error.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error saving user:', error);
+                alert('Có lỗi xảy ra khi lưu người dùng!');
+            }
+        }
+
+        async function updateUser() {
+            const id = document.getElementById('userId').value;
+            const email = document.getElementById('userEmail').value;
+            const fullName = document.getElementById('userFullName').value;
+            const phone = document.getElementById('userPhone').value;
+            const address = document.getElementById('userAddress').value;
+            const isActive = document.getElementById('userIsActive').checked;
+            const roles = Array.from(document.querySelectorAll('#rolesCheckboxes .form-check-input:checked'))
+                .map(checkbox => checkbox.value);
+
+            if (!email || !fullName) {
+                return alert('Email và họ tên là bắt buộc!');
+            }
+
+            const userData = {
+                email,
+                fullName,
+                phone,
+                address,
+                isActive,
+                roles
+            };
+
+            try {
+                const response = await fetchWithAuth(`/api/users/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    alert('Cập nhật người dùng thành công!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
+                    modal.hide();
+                    loadUsers();
+                } else {
+                    const error = await response.json();
+                    alert('Không thể cập nhật người dùng: ' + (error.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert('Có lỗi xảy ra khi cập nhật người dùng!');
+            }
+        }
+
+        async function resetPassword(userId, userEmail) {
+            if (!confirm(`Bạn có chắc chắn muốn cấp lại mật khẩu cho người dùng "${userEmail}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/users/${userId}/reset-password`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`Cấp lại mật khẩu thành công!\n\nEmail: ${result.email}\nMật khẩu mới: ${result.newPassword}\n\nVui lòng ghi nhớ và thông báo cho người dùng.`);
+                } else {
+                    const error = await response.json();
+                    alert('Không thể cấp lại mật khẩu: ' + (error.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error);
+                alert('Có lỗi xảy ra khi cấp lại mật khẩu!');
+            }
+        }
+    </script>
+</body>
+</html>

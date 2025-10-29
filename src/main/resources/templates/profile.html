@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .nav-pills .nav-link {
+            color: #667eea;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.6rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .info-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .badge-custom {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-shop"></i> Fashion Shop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products">Sản phẩm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/orders">Đơn hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cart">
+                            <i class="bi bi-cart3"></i> Giỏ hàng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/profile">
+                            <i class="bi bi-person-circle"></i> Tài khoản
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="container text-center">
+            <div class="profile-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <h2 id="headerFullName">Đang tải...</h2>
+            <p class="mb-0" id="headerEmail"></p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container pb-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="profile-card">
+                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+                        <button class="nav-link active" id="info-tab" data-bs-toggle="pill"
+                                data-bs-target="#info" type="button">
+                            <i class="bi bi-person-badge"></i> Thông tin cá nhân
+                        </button>
+                        <button class="nav-link" id="edit-tab" data-bs-toggle="pill"
+                                data-bs-target="#edit" type="button">
+                            <i class="bi bi-pencil-square"></i> Chỉnh sửa
+                        </button>
+                        <button class="nav-link" id="password-tab" data-bs-toggle="pill"
+                                data-bs-target="#password" type="button">
+                            <i class="bi bi-shield-lock"></i> Đổi mật khẩu
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="col-lg-9">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <!-- Thông tin cá nhân -->
+                    <div class="tab-pane fade show active" id="info" role="tabpanel">
+                        <div class="profile-card">
+                            <h4 class="mb-4">
+                                <i class="bi bi-person-badge text-primary"></i> Thông tin cá nhân
+                            </h4>
+                            <div id="profileInfo">
+                                <div class="info-item">
+                                    <div class="info-label">Họ và tên</div>
+                                    <div class="info-value" id="infoFullName">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value" id="infoEmail">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Số điện thoại</div>
+                                    <div class="info-value" id="infoPhone">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Giới tính</div>
+                                    <div class="info-value" id="infoGender">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Ngày sinh</div>
+                                    <div class="info-value" id="infoBirthday">-</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Điểm tích lũy</div>
+                                    <div class="info-value">
+                                        <span class="badge badge-custom bg-warning text-dark" id="infoLoyaltyPoint">0</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Trạng thái tài khoản</div>
+                                    <div class="info-value">
+                                        <span class="badge badge-custom bg-success" id="infoStatus">Đang hoạt động</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Ngày tạo tài khoản</div>
+                                    <div class="info-value" id="infoCreatedAt">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chỉnh sửa thông tin -->
+                    <div class="tab-pane fade" id="edit" role="tabpanel">
+                        <div class="profile-card">
+                            <h4 class="mb-4">
+                                <i class="bi bi-pencil-square text-primary"></i> Chỉnh sửa thông tin
+                            </h4>
+                            <form id="updateProfileForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Họ và tên *</label>
+                                        <input type="text" class="form-control" id="editFullName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Số điện thoại</label>
+                                        <input type="text" class="form-control" id="editPhone"
+                                               pattern="[0-9]{10}" placeholder="0123456789">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Giới tính</label>
+                                        <select class="form-select" id="editGender">
+                                            <option value="">-- Chọn giới tính --</option>
+                                            <option value="MALE">Nam</option>
+                                            <option value="FEMALE">Nữ</option>
+                                            <option value="OTHER">Khác</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ngày sinh</label>
+                                        <input type="date" class="form-control" id="editBirthday">
+                                    </div>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Email không thể thay đổi. Vui lòng liên hệ quản trị viên nếu cần hỗ trợ.
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-save"></i> Lưu thay đổi
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Đổi mật khẩu -->
+                    <div class="tab-pane fade" id="password" role="tabpanel">
+                        <div class="profile-card">
+                            <h4 class="mb-4">
+                                <i class="bi bi-shield-lock text-primary"></i> Đổi mật khẩu
+                            </h4>
+                            <form id="changePasswordForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Mật khẩu hiện tại *</label>
+                                    <input type="password" class="form-control" id="currentPassword" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Mật khẩu mới *</label>
+                                    <input type="password" class="form-control" id="newPassword"
+                                           minlength="6" required>
+                                    <small class="text-muted">Mật khẩu phải có ít nhất 6 ký tự</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Xác nhận mật khẩu mới *</label>
+                                    <input type="password" class="form-control" id="confirmPassword"
+                                           minlength="6" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="bi bi-key"></i> Đổi mật khẩu
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="toast" class="toast" role="alert">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = '/api';
+        let currentProfile = null;
+
+        // Kiểm tra đăng nhập
+        function checkAuth() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login';
+                return false;
+            }
+            return true;
+        }
+
+        // Hiển thị toast
+        function showToast(title, message, isError = false) {
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastBody').textContent = message;
+            const toastEl = document.getElementById('toast');
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        // Gọi API với JWT
+        async function apiCall(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers
+            };
+
+            const response = await fetch(url, { ...options, headers });
+
+            if (response.status === 401) {
+                // Token hết hạn, thử refresh
+                const refreshed = await refreshToken();
+                if (refreshed) {
+                    // Thử lại request
+                    const newToken = localStorage.getItem('accessToken');
+                    headers['Authorization'] = `Bearer ${newToken}`;
+                    return await fetch(url, { ...options, headers });
+                } else {
+                    window.location.href = '/login';
+                    throw new Error('Unauthorized');
+                }
+            }
+
+            return response;
+        }
+
+        // Refresh token
+        async function refreshToken() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (!refreshToken) return false;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('accessToken', data.accessToken);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    return true;
+                }
+            } catch (error) {
+                console.error('Refresh token failed:', error);
+            }
+            return false;
+        }
+
+        // Lấy thông tin profile
+        async function loadProfile() {
+            try {
+                const response = await apiCall(`${API_BASE_URL}/profile`);
+                if (response.ok) {
+                    currentProfile = await response.json();
+                    displayProfile(currentProfile);
+                } else {
+                    showToast('Lỗi', 'Không thể tải thông tin người dùng', true);
+                }
+            } catch (error) {
+                console.error('Load profile error:', error);
+                showToast('Lỗi', 'Có lỗi xảy ra khi tải thông tin', true);
+            }
+        }
+
+        // Hiển thị thông tin profile
+        function displayProfile(profile) {
+            // Header
+            document.getElementById('headerFullName').textContent = profile.fullName || 'Người dùng';
+            document.getElementById('headerEmail').textContent = profile.email || '';
+
+            // Tab thông tin
+            document.getElementById('infoFullName').textContent = profile.fullName || '-';
+            document.getElementById('infoEmail').textContent = profile.email || '-';
+            document.getElementById('infoPhone').textContent = profile.phone || 'Chưa cập nhật';
+            document.getElementById('infoGender').textContent =
+                profile.gender ? (profile.gender === 'MALE' ? 'Nam' : profile.gender === 'FEMALE' ? 'Nữ' : 'Khác') : '-';
+            document.getElementById('infoBirthday').textContent =
+                profile.birthday ? new Date(profile.birthday).toLocaleDateString('vi-VN') : '-';
+            document.getElementById('infoLoyaltyPoint').textContent = profile.loyaltyPoint || 0;
+            document.getElementById('infoStatus').textContent = profile.isActive ? 'Đang hoạt động' : 'Đã khóa';
+            document.getElementById('infoStatus').className =
+                `badge badge-custom ${profile.isActive ? 'bg-success' : 'bg-danger'}`;
+            document.getElementById('infoCreatedAt').textContent =
+                profile.createdAt ? new Date(profile.createdAt).toLocaleString('vi-VN') : '-';
+
+            // Form chỉnh sửa
+            document.getElementById('editFullName').value = profile.fullName || '';
+            document.getElementById('editPhone').value = profile.phone || '';
+            document.getElementById('editGender').value = profile.gender || '';
+            document.getElementById('editBirthday').value = profile.birthday || '';
+        }
+
+        // Cập nhật profile
+        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                fullName: document.getElementById('editFullName').value,
+                phone: document.getElementById('editPhone').value,
+                gender: document.getElementById('editGender').value,
+                birthday: document.getElementById('editBirthday').value || null
+            };
+
+            try {
+                const response = await apiCall(`${API_BASE_URL}/profile`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Thành công', 'Cập nhật thông tin thành công!');
+                    currentProfile = result;
+                    displayProfile(result);
+
+                    // Chuyển về tab thông tin
+                    setTimeout(() => {
+                        document.getElementById('info-tab').click();
+                    }, 1500);
+                } else {
+                    showToast('Lỗi', result.message || 'Không thể cập nhật thông tin', true);
+                }
+            } catch (error) {
+                console.error('Update profile error:', error);
+                showToast('Lỗi', 'Có lỗi xảy ra khi cập nhật thông tin', true);
+            }
+        });
+
+        // Đổi mật khẩu
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                showToast('Lỗi', 'Mật khẩu mới và xác nhận mật khẩu không khớp', true);
+                return;
+            }
+
+            const data = { currentPassword, newPassword, confirmPassword };
+
+            try {
+                const response = await apiCall(`${API_BASE_URL}/profile/change-password`, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast('Thành công', 'Đổi mật khẩu thành công!');
+                    document.getElementById('changePasswordForm').reset();
+                } else {
+                    showToast('Lỗi', result.message || 'Không thể đổi mật khẩu', true);
+                }
+            } catch (error) {
+                console.error('Change password error:', error);
+                showToast('Lỗi', 'Có lỗi xảy ra khi đổi mật khẩu', true);
+            }
+        });
+
+        // Đăng xuất
+        function logout() {
+            const refreshToken = localStorage.getItem('refreshToken');
+            if (refreshToken) {
+                fetch(`${API_BASE_URL}/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                }).catch(err => console.error('Logout error:', err));
+            }
+
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            window.location.href = '/login';
+        }
+
+        // Khởi tạo
+        if (checkAuth()) {
+            loadProfile();
+        }
+    </script>
+</body>
+</html>
+

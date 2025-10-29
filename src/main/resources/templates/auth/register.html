@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .register-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+        }
+        .register-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 40px;
+        }
+        .register-form {
+            padding: 40px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        .is-valid {
+            border-color: #28a745 !important;
+        }
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .valid-feedback {
+            display: block;
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="register-container">
+            <div class="row g-0">
+                <!-- Left Side - Image/Branding -->
+                <div class="col-md-5 register-image d-none d-md-flex flex-column">
+                    <i class="bi bi-bag-heart-fill" style="font-size: 80px;"></i>
+                    <h2 class="mt-3">Fashion Shop</h2>
+                    <p class="text-center">Tạo tài khoản mới</p>
+                    <div class="mt-4">
+                        <p><i class="bi bi-check-circle-fill"></i> Miễn phí đăng ký</p>
+                        <p><i class="bi bi-check-circle-fill"></i> Ưu đãi đặc biệt</p>
+                        <p><i class="bi bi-check-circle-fill"></i> Giao hàng nhanh chóng</p>
+                    </div>
+                </div>
+
+                <!-- Right Side - Register Form -->
+                <div class="col-md-7 register-form">
+                    <h3 class="mb-4">Đăng ký tài khoản</h3>
+
+                    <!-- Alert Messages -->
+                    <div id="alert-container"></div>
+
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="fullName" name="fullName"
+                                       placeholder="Nguyễn Văn A" required>
+                            </div>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập họ và tên (tối thiểu 3 ký tự).
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       placeholder="example@email.com" required>
+                            </div>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập địa chỉ email hợp lệ.
+                            </div>
+                            <div class="form-text">Email sẽ dùng để đăng nhập</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Số điện thoại</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                       placeholder="0987654321" pattern="[0-9]{10}">
+                            </div>
+                            <div class="invalid-feedback">
+                                Số điện thoại phải có đúng 10 chữ số.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                       placeholder="Tối thiểu 6 ký tự" required minlength="6">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                Mật khẩu phải có ít nhất 6 ký tự.
+                            </div>
+                            <div class="password-strength" id="passwordStrength"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                       placeholder="Nhập lại mật khẩu" required minlength="6">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                Mật khẩu xác nhận không khớp.
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                Tôi đồng ý với <a href="#" class="text-decoration-none">Điều khoản dịch vụ</a>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="bi bi-person-plus"></i> Đăng ký
+                        </button>
+
+                        <div class="text-center">
+                            <p class="mb-2">Đã có tài khoản?
+                                <a href="/login" class="text-decoration-none">Đăng nhập ngay</a>
+                            </p>
+                            <p class="mb-0">
+                                <a href="/forgot-password" class="text-decoration-none text-muted">
+                                    <i class="bi bi-key"></i> Quên mật khẩu?
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('confirmPassword');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            strengthBar.style.width = (strength * 20) + '%';
+
+            if (strength <= 2) {
+                strengthBar.style.backgroundColor = '#dc3545';
+            } else if (strength <= 3) {
+                strengthBar.style.backgroundColor = '#ffc107';
+            } else {
+                strengthBar.style.backgroundColor = '#28a745';
+            }
+        });
+
+        // Show alert message
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alert;
+
+            // Scroll to alert
+            alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Show validation errors
+        function showValidationErrors(errors) {
+            const alertContainer = document.getElementById('alert-container');
+            let errorList = '<ul class="mb-0">';
+
+            for (const [field, message] of Object.entries(errors)) {
+                errorList += `<li>${message}</li>`;
+            }
+
+            errorList += '</ul>';
+
+            const alert = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Lỗi nhập liệu:</strong>
+                    ${errorList}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alert;
+
+            // Scroll to alert
+            alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Handle register form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Clear previous validation classes
+            document.getElementById('fullName').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('email').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('phone').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('password').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('confirmPassword').classList.remove('is-invalid', 'is-valid');
+
+            let hasError = false;
+
+            // Validate full name (minimum 3 characters)
+            if (fullName.trim().length < 3) {
+                document.getElementById('fullName').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('fullName').classList.add('is-valid');
+            }
+
+            // Validate email
+            if (!validateEmail(email)) {
+                document.getElementById('email').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('email').classList.add('is-valid');
+            }
+
+            // Validate phone (10 digits, optional)
+            if (phone && !validatePhone(phone)) {
+                document.getElementById('phone').classList.add('is-invalid');
+                hasError = true;
+            } else if (phone) {
+                document.getElementById('phone').classList.add('is-valid');
+            }
+
+            // Validate password (minimum 6 characters)
+            if (password.length < 6) {
+                document.getElementById('password').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('password').classList.add('is-valid');
+            }
+
+            // Validate confirm password match
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPassword').classList.add('is-invalid');
+                hasError = true;
+            } else if (confirmPassword.length >= 6) {
+                document.getElementById('confirmPassword').classList.add('is-valid');
+            }
+
+            if (hasError) {
+                showAlert('Vui lòng sửa các lỗi bên dưới và thử lại.', 'danger');
+                return;
+            }
+
+            const requestData = {
+                fullName,
+                email,
+                password
+            };
+
+            if (phone) {
+                requestData.phone = phone;
+            }
+
+            try {
+                console.log('Sending request:', requestData);
+
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('Response status:', response.status);
+
+                // Check if response has content
+                const contentType = response.headers.get('content-type');
+                let data;
+
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error('Server returned non-JSON response');
+                }
+
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    // Save tokens to localStorage using auth.js utility
+                    setAuthData(data);
+
+                    // Start auto-refresh timer
+                    startTokenRefreshTimer();
+
+                    showAlert('Đăng ký thành công! Đang chuyển hướng...', 'success');
+
+                    // Redirect to products page
+                    setTimeout(() => {
+                        window.location.href = '/products';
+                    }, 1500);
+                } else {
+                    // Check if there are validation errors
+                    if (data.validationErrors && Object.keys(data.validationErrors).length > 0) {
+                        showValidationErrors(data.validationErrors);
+                    } else {
+                        showAlert(data.message || 'Đăng ký thất bại! Vui lòng thử lại.', 'danger');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Có lỗi xảy ra! Vui lòng thử lại. Chi tiết: ' + error.message, 'danger');
+            }
+        });
+
+        // Email validation function
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        // Phone validation function
+        function validatePhone(phone) {
+            const re = /^[0-9]{10}$/;
+            return re.test(phone);
+        }
+    </script>
+</body>
+</html>

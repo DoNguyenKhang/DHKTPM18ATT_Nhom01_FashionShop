@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            margin: auto;
+        }
+        .login-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 40px;
+        }
+        .login-form {
+            padding: 40px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        .is-valid {
+            border-color: #28a745 !important;
+        }
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .valid-feedback {
+            display: block;
+            color: #28a745;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="row g-0">
+                <!-- Left Side - Image/Branding -->
+                <div class="col-md-5 login-image d-none d-md-flex flex-column">
+                    <i class="bi bi-bag-heart-fill" style="font-size: 80px;"></i>
+                    <h2 class="mt-3">Fashion Shop</h2>
+                    <p class="text-center">Chào mừng bạn trở lại!</p>
+                </div>
+
+                <!-- Right Side - Login Form -->
+                <div class="col-md-7 login-form">
+                    <h3 class="mb-4">Đăng nhập</h3>
+
+                    <!-- Alert Messages -->
+                    <div id="alert-container"></div>
+
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       placeholder="example@email.com" required>
+                            </div>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập địa chỉ email hợp lệ.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                       placeholder="Nhập mật khẩu" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập mật khẩu.
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
+                            </div>
+                            <a href="/forgot-password" class="text-decoration-none">Quên mật khẩu?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                        </button>
+
+                        <div class="text-center">
+                            <p class="mb-0">Chưa có tài khoản?
+                                <a href="/register" class="text-decoration-none">Đăng ký ngay</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+
+        // Show alert message
+        function showAlert(message, type = 'danger') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alert;
+
+            // Scroll to alert
+            alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Show validation errors
+        function showValidationErrors(errors) {
+            const alertContainer = document.getElementById('alert-container');
+            let errorList = '<ul class="mb-0">';
+
+            for (const [field, message] of Object.entries(errors)) {
+                errorList += `<li>${message}</li>`;
+            }
+
+            errorList += '</ul>';
+
+            const alert = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Lỗi nhập liệu:</strong>
+                    ${errorList}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alert;
+
+            // Scroll to alert
+            alertContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Clear previous validation classes
+            document.getElementById('email').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('password').classList.remove('is-invalid', 'is-valid');
+
+            let hasError = false;
+
+            // Client-side validation
+            if (!validateEmail(email)) {
+                document.getElementById('email').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('email').classList.add('is-valid');
+            }
+
+            if (password.trim() === '') {
+                document.getElementById('password').classList.add('is-invalid');
+                hasError = true;
+            } else {
+                document.getElementById('password').classList.add('is-valid');
+            }
+
+            if (hasError) {
+                showAlert('Vui lòng sửa các lỗi bên dưới và thử lại.', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Save tokens to localStorage using auth.js utility
+                    setAuthData(data);
+
+                    // Start auto-refresh timer
+                    startTokenRefreshTimer();
+
+                    showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+
+                    // Redirect based on user role
+                    setTimeout(() => {
+                        if (data.user.roles.includes('ADMIN') || data.user.roles.includes('STAFF_PRODUCT') || data.user.roles.includes('STAFF_SALES')) {
+                            window.location.href = '/dashboard';
+                        } else {
+                            window.location.href = '/products';
+                        }
+                    }, 1000);
+                } else {
+                    // Check if there are validation errors
+                    if (data.validationErrors && Object.keys(data.validationErrors).length > 0) {
+                        showValidationErrors(data.validationErrors);
+                    } else {
+                        showAlert(data.message || 'Email hoặc mật khẩu không đúng!', 'danger');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Có lỗi xảy ra! Vui lòng thử lại.', 'danger');
+            }
+        });
+
+        // Email validation function
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+    </script>
+</body>
+</html>

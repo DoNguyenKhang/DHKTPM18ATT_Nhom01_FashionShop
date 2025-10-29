@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết sản phẩm - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* Navbar Styles */
+        .navbar-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .navbar-custom .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.4rem;
+            transition: transform 0.3s;
+        }
+        .navbar-custom .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+        .navbar-custom .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s;
+            border-radius: 5px;
+            margin: 0 0.2rem;
+        }
+        .navbar-custom .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white !important;
+        }
+        .navbar-custom .nav-link.active {
+            background: rgba(255,255,255,0.25);
+            color: white !important;
+        }
+        .navbar-custom .btn-register {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        .navbar-custom .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+        .navbar-custom .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            margin-top: 0.5rem;
+        }
+        .navbar-custom .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            transition: all 0.3s;
+        }
+        .navbar-custom .dropdown-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .product-image-main {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            cursor: zoom-in;
+            border-radius: 8px;
+        }
+        .product-image-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        .product-image-thumb:hover,
+        .product-image-thumb.active {
+            border-color: #667eea;
+        }
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin: 5px;
+        }
+        .color-option:hover,
+        .color-option.active {
+            border-color: #667eea;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+        .size-option {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            margin: 5px;
+        }
+        .size-option:hover,
+        .size-option.active {
+            border-color: #667eea;
+            background-color: #667eea;
+            color: white;
+        }
+        .size-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .review-stars {
+            color: #ffc107;
+        }
+        .review-card {
+            border-left: 3px solid #667eea;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+        }
+        .related-product-card {
+            transition: transform 0.3s;
+        }
+        .related-product-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-bag-heart-fill"></i> Fashion Shop
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door"></i> Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/products">
+                            <i class="bi bi-box-seam"></i> Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item" id="cartNav" style="display: none;">
+                        <a class="nav-link" href="/cart">
+                            <i class="bi bi-cart3"></i> Giỏ hàng
+                            <span class="badge bg-warning text-dark" id="cartCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="ordersNav" style="display: none;">
+                        <a class="nav-link" href="/orders">
+                            <i class="bi bi-bag-check"></i> Đơn hàng
+                        </a>
+                    </li>
+                    <li class="nav-item" id="dashboardNav" style="display: none;">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item" id="loginNav">
+                        <a class="nav-link" href="/login">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                        </a>
+                    </li>
+                    <li class="nav-item" id="registerNav" style="display: none;">
+                        <a class="nav-link btn-register" href="/register">
+                            <i class="bi bi-person-plus"></i> Đăng ký
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> <span id="userName"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile">
+                                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+                            </a></li>
+                            <li><a class="dropdown-item" href="/orders">
+                                <i class="bi bi-bag-check"></i> Đơn hàng của tôi
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="container mt-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/products">Sản phẩm</a></li>
+                <li class="breadcrumb-item active" id="breadcrumbCategory">...</li>
+                <li class="breadcrumb-item active" aria-current="page" id="breadcrumbProduct">...</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Product Detail -->
+    <div class="container my-5">
+        <div class="row" id="productDetailContainer">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="container my-5">
+        <h3 class="mb-4"><i class="bi bi-chat-quote"></i> Đánh giá sản phẩm</h3>
+
+        <!-- Review Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center">
+                        <h1 class="display-3 mb-0" id="avgRating">0.0</h1>
+                        <div class="review-stars mb-2" id="avgStars">
+                            <i class="bi bi-star"></i>
+                            <i class="bi bi-star"></i>
+                            <i class="bi bi-star"></i>
+                            <i class="bi bi-star"></i>
+                            <i class="bi bi-star"></i>
+                        </div>
+                        <p class="text-muted"><span id="totalReviews">0</span> đánh giá</p>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="mb-2" id="ratingBars"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Review Form (for logged-in users) -->
+        <div class="card mb-4" id="addReviewCard" style="display: none;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Viết đánh giá của bạn</h5>
+            </div>
+            <div class="card-body">
+                <form id="reviewForm">
+                    <div class="mb-3">
+                        <label class="form-label">Đánh giá của bạn <span class="text-danger">*</span></label>
+                        <div class="btn-group" role="group">
+                            <input type="radio" class="btn-check" name="rating" id="rating1" value="1">
+                            <label class="btn btn-outline-warning" for="rating1"><i class="bi bi-star-fill"></i> 1</label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating2" value="2">
+                            <label class="btn btn-outline-warning" for="rating2"><i class="bi bi-star-fill"></i> 2</label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating3" value="3">
+                            <label class="btn btn-outline-warning" for="rating3"><i class="bi bi-star-fill"></i> 3</label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating4" value="4">
+                            <label class="btn btn-outline-warning" for="rating4"><i class="bi bi-star-fill"></i> 4</label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating5" value="5" checked>
+                            <label class="btn btn-outline-warning" for="rating5"><i class="bi bi-star-fill"></i> 5</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề</label>
+                        <input type="text" class="form-control" id="reviewTitle" placeholder="Tóm tắt đánh giá của bạn">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reviewComment" rows="4" placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> Gửi đánh giá
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div id="reviewsList"></div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="container my-5">
+        <h3 class="mb-4"><i class="bi bi-bag"></i> Sản phẩm liên quan</h3>
+        <div class="row g-4" id="relatedProducts">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2025 Fashion Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        const user = getUser();
+        let currentProduct = null;
+        let currentVariants = [];
+        let selectedColor = null;
+        let selectedSize = null;
+        let selectedVariant = null;
+
+        // Update navbar based on user login status
+        function updateNavigation() {
+            if (user) {
+                // Hide login/register, show user menus
+                document.getElementById('loginNav').style.display = 'none';
+                const registerNav = document.getElementById('registerNav');
+                if (registerNav) registerNav.style.display = 'none';
+
+                // Show user-specific menus
+                document.getElementById('cartNav').style.display = 'block';
+                document.getElementById('ordersNav').style.display = 'block';
+                document.getElementById('userDropdown').style.display = 'block';
+                document.getElementById('userName').textContent = user.fullName || user.username;
+
+                // Show admin menu if user is admin
+                if (user.roles && user.roles.includes('ADMIN')) {
+                    document.getElementById('dashboardNav').style.display = 'block';
+                }
+            } else {
+                // Show register button for non-logged in users
+                const registerNav = document.getElementById('registerNav');
+                if (registerNav) registerNav.style.display = 'block';
+            }
+        }
+
+        // Initialize navigation
+        updateNavigation();
+
+        // Get product slug from URL
+        const slug = window.location.pathname.split('/').pop();
+
+        // Load product details
+        async function loadProductDetail() {
+            try {
+                const response = await fetch(`/api/products/slug/${slug}`);
+                if (!response.ok) {
+                    throw new Error('Product not found');
+                }
+
+                currentProduct = await response.json();
+                currentVariants = currentProduct.variants || [];
+
+                displayProductDetail(currentProduct);
+                updateBreadcrumb(currentProduct);
+                loadReviews(currentProduct.id);
+                loadRelatedProducts(currentProduct);
+            } catch (error) {
+                console.error('Error loading product:', error);
+                document.getElementById('productDetailContainer').innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            <h4>Không tìm thấy sản phẩm!</h4>
+                            <p>Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+                            <a href="/products" class="btn btn-primary">Quay lại danh sách sản phẩm</a>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateBreadcrumb(product) {
+            const category = product.categories && product.categories.length > 0
+                ? product.categories[0].name
+                : 'Sản phẩm';
+            document.getElementById('breadcrumbCategory').textContent = category;
+            document.getElementById('breadcrumbProduct').textContent = product.name;
+            document.title = `${product.name} - Fashion Store`;
+        }
+
+        function displayProductDetail(product) {
+            const images = product.images || [];
+            const mainImage = images.length > 0 ? images[0].url : 'https://via.placeholder.com/500';
+
+            // Get unique colors and sizes
+            const colors = [...new Map(currentVariants
+                .filter(v => v.color)
+                .map(v => [v.color.id, v.color])).values()];
+
+            const sizes = [...new Map(currentVariants
+                .filter(v => v.size)
+                .map(v => [v.size.id, v.size])).values()];
+
+            // Get price range
+            const prices = currentVariants.map(v => v.price);
+            const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+            const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+            const priceDisplay = minPrice === maxPrice
+                ? formatCurrency(minPrice)
+                : `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
+
+            const html = `
+                <div class="col-md-6">
+                    <!-- Main Image -->
+                    <div class="position-relative mb-3">
+                        ${!product.isActive ? '<span class="badge bg-secondary product-badge">Ngừng bán</span>' : ''}
+                        <img src="${mainImage}" class="product-image-main" id="mainImage" alt="${product.name}">
+                    </div>
+
+                    <!-- Thumbnails -->
+                    <div class="d-flex gap-2 flex-wrap" id="imageThumbnails">
+                        ${images.map((img, idx) => `
+                            <img src="${img.url}"
+                                 class="product-image-thumb ${idx === 0 ? 'active' : ''}"
+                                 onclick="changeMainImage('${img.url}', ${idx})"
+                                 alt="Image ${idx + 1}">
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h1 class="mb-3">${product.name}</h1>
+
+                    <!-- Brand -->
+                    ${product.brand ? `
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-tag"></i> Thương hiệu:
+                            <strong>${product.brand.name}</strong>
+                        </p>
+                    ` : ''}
+
+                    <!-- Price -->
+                    <h2 class="text-primary mb-3" id="productPrice">${priceDisplay}</h2>
+
+                    <!-- Rating -->
+                    <div class="mb-3">
+                        <span class="review-stars" id="productRatingStars">
+                            ${generateStarRating(product.averageRating || 0)}
+                        </span>
+                        <span class="text-muted">(${(product.averageRating || 0).toFixed(1)} / 5.0 - ${product.totalReviews || 0} đánh giá)</span>
+                    </div>
+
+                    <!-- Stock Status -->
+                    <p class="mb-3">
+                        <span class="badge bg-success" id="stockBadge">
+                            <i class="bi bi-check-circle"></i> Còn hàng
+                        </span>
+                    </p>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h5>Mô tả sản phẩm:</h5>
+                        <p class="text-muted">${product.description || 'Chưa có mô tả'}</p>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="mb-4">
+                        ${product.material ? `<p><strong>Chất liệu:</strong> ${product.material}</p>` : ''}
+                        ${product.origin ? `<p><strong>Xuất xứ:</strong> ${product.origin}</p>` : ''}
+                    </div>
+
+                    <!-- Color Selection -->
+                    ${colors.length > 0 ? `
+                        <div class="mb-4">
+                            <h6>Màu sắc:</h6>
+                            <div id="colorOptions">
+                                ${colors.map(color => `
+                                    <div class="color-option"
+                                         style="background-color: ${color.hex || '#ccc'}"
+                                         onclick="selectColor(${color.id}, '${color.name}')"
+                                         title="${color.name}"
+                                         data-color-id="${color.id}">
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <small class="text-muted" id="selectedColorText">Chưa chọn màu</small>
+                        </div>
+                    ` : ''}
+
+                    <!-- Size Selection -->
+                    ${sizes.length > 0 ? `
+                        <div class="mb-4">
+                            <h6>Kích thước:</h6>
+                            <div id="sizeOptions">
+                                ${sizes.map(size => `
+                                    <span class="size-option"
+                                          onclick="selectSize(${size.id}, '${size.name}')"
+                                          data-size-id="${size.id}">
+                                        ${size.name}
+                                    </span>
+                                `).join('')}
+                            </div>
+                            <small class="text-muted" id="selectedSizeText">Chưa chọn size</small>
+                        </div>
+                    ` : ''}
+
+                    <!-- Quantity -->
+                    <div class="mb-4">
+                        <h6>Số lượng:</h6>
+                        <div class="input-group" style="max-width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="100">
+                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" onclick="addToCart()" ${!product.isActive ? 'disabled' : ''}>
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="buyNow()" ${!product.isActive ? 'disabled' : ''}>
+                            <i class="bi bi-lightning"></i> Mua ngay
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('productDetailContainer').innerHTML = html;
+
+            // Auto-select first color and size if only one option
+            if (colors.length === 1) {
+                selectColor(colors[0].id, colors[0].name);
+            }
+            if (sizes.length === 1) {
+                selectSize(sizes[0].id, sizes[0].name);
+            }
+        }
+
+        function changeMainImage(url, index) {
+            document.getElementById('mainImage').src = url;
+            document.querySelectorAll('.product-image-thumb').forEach((thumb, idx) => {
+                thumb.classList.toggle('active', idx === index);
+            });
+        }
+
+        function selectColor(colorId, colorName) {
+            selectedColor = colorId;
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.colorId == colorId);
+            });
+            document.getElementById('selectedColorText').textContent = `Đã chọn: ${colorName}`;
+            updateVariantSelection();
+        }
+
+        function selectSize(sizeId, sizeName) {
+            selectedSize = sizeId;
+            document.querySelectorAll('.size-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.sizeId == sizeId);
+            });
+            document.getElementById('selectedSizeText').textContent = `Đã chọn: ${sizeName}`;
+            updateVariantSelection();
+        }
+
+        function updateVariantSelection() {
+            // Find matching variant
+            selectedVariant = currentVariants.find(v => {
+                const colorMatch = !selectedColor || (v.color && v.color.id == selectedColor);
+                const sizeMatch = !selectedSize || (v.size && v.size.id == selectedSize);
+                return colorMatch && sizeMatch;
+            });
+
+            if (selectedVariant) {
+                // Update price display
+                const priceElement = document.getElementById('productPrice');
+                if (selectedVariant.compareAtPrice && selectedVariant.compareAtPrice > selectedVariant.price) {
+                    priceElement.innerHTML = `
+                        <span class="text-decoration-line-through text-muted me-2">${formatCurrency(selectedVariant.compareAtPrice)}</span>
+                        <span class="text-danger">${formatCurrency(selectedVariant.price)}</span>
+                        <span class="badge bg-danger ms-2">SALE ${Math.round((1 - selectedVariant.price / selectedVariant.compareAtPrice) * 100)}%</span>
+                    `;
+                } else {
+                    priceElement.textContent = formatCurrency(selectedVariant.price);
+                }
+
+                // Update stock status badge
+                const stockBadge = document.getElementById('stockBadge');
+                const quantityInput = document.getElementById('quantity');
+
+                if (selectedVariant.stock > 0) {
+                    stockBadge.className = 'badge bg-success';
+                    if (selectedVariant.stock < 10) {
+                        stockBadge.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Chỉ còn ${selectedVariant.stock} sản phẩm`;
+                        stockBadge.className = 'badge bg-warning text-dark';
+                    } else {
+                        stockBadge.innerHTML = `<i class="bi bi-check-circle"></i> Còn ${selectedVariant.stock} sản phẩm`;
+                    }
+                    quantityInput.max = selectedVariant.stock;
+                    quantityInput.disabled = false;
+
+                    // Adjust quantity if exceeds stock
+                    if (parseInt(quantityInput.value) > selectedVariant.stock) {
+                        quantityInput.value = selectedVariant.stock;
+                    }
+                } else {
+                    stockBadge.className = 'badge bg-danger';
+                    stockBadge.innerHTML = `<i class="bi bi-x-circle"></i> Hết hàng`;
+                    quantityInput.disabled = true;
+                    quantityInput.value = 0;
+                }
+
+                // Display SKU if available
+                const skuElement = document.getElementById('productSku');
+                if (skuElement && selectedVariant.sku) {
+                    skuElement.innerHTML = `<small class="text-muted">Mã sản phẩm: <strong>${selectedVariant.sku}</strong></small>`;
+                }
+            } else {
+                // No variant selected or found
+                const stockBadge = document.getElementById('stockBadge');
+                stockBadge.className = 'badge bg-secondary';
+                stockBadge.innerHTML = `<i class="bi bi-info-circle"></i> Vui lòng chọn màu sắc và kích thước`;
+            }
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            if (input.value > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            const max = selectedVariant ? selectedVariant.stock : 100;
+            if (input.value < max) {
+                input.value = parseInt(input.value) + 1;
+            }
+        }
+
+        async function addToCart() {
+            if (!user) {
+                alert('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!');
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!selectedVariant) {
+                alert('Vui lòng chọn màu sắc và kích thước!');
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            // Check stock before adding to cart
+            try {
+                const stockResponse = await fetch(`/api/products/variants/${selectedVariant.id}/stock?quantity=${quantity}`);
+                const stockData = await stockResponse.json();
+
+                if (!stockData.isAvailable) {
+                    alert(stockData.message);
+                    return;
+                }
+
+                // Proceed to add to cart if stock is available
+                const response = await fetchWithAuth('/api/cart/items', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        variantId: selectedVariant.id,
+                        quantity: quantity
+                    })
+                });
+
+                if (response.ok) {
+                    showSuccessMessage('Đã thêm sản phẩm vào giỏ hàng!');
+                    updateCartCount();
+                } else {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể thêm vào giỏ hàng'));
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        }
+
+        function buyNow() {
+            if (!user) {
+                alert('Vui lòng đăng nhập để mua hàng!');
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!selectedVariant) {
+                alert('Vui lòng chọn màu sắc và kích thước!');
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            // Check stock before buying
+            fetch(`/api/products/variants/${selectedVariant.id}/stock?quantity=${quantity}`)
+                .then(res => res.json())
+                .then(stockData => {
+                    if (!stockData.isAvailable) {
+                        alert(stockData.message);
+                        return;
+                    }
+
+                    // Proceed to add to cart and redirect
+                    addToCart().then(() => {
+                        window.location.href = '/cart';
+                    });
+                })
+                .catch(error => {
+                    console.error('Error checking stock:', error);
+                    alert('Có lỗi xảy ra khi kiểm tra tồn kho!');
+                });
+        }
+
+        function showSuccessMessage(message) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed top-0 end-0 p-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-header bg-success text-white">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong class="me-auto">Thành công</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        async function updateCartCount() {
+            // TODO: Implement cart count update
+        }
+
+        // Load reviews
+        async function loadReviews(productId) {
+            try {
+                const response = await fetch(`/api/products/${productId}/reviews`);
+                if (response.ok) {
+                    const reviews = await response.json();
+                    displayReviews(reviews);
+                } else {
+                    document.getElementById('reviewsList').innerHTML = '<p class="text-muted">Chưa có đánh giá nào.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                document.getElementById('reviewsList').innerHTML = '<p class="text-muted">Không thể tải đánh giá.</p>';
+            }
+
+            // Show review form if user is logged in
+            if (user) {
+                document.getElementById('addReviewCard').style.display = 'block';
+            }
+        }
+
+        function displayReviews(reviews) {
+            if (!reviews || reviews.length === 0) {
+                document.getElementById('reviewsList').innerHTML = '<p class="text-muted">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>';
+                return;
+            }
+
+            // Calculate rating summary
+            const totalReviews = reviews.length;
+            const avgRating = (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1);
+
+            document.getElementById('avgRating').textContent = avgRating;
+            document.getElementById('totalReviews').textContent = totalReviews;
+
+            // Update star display
+            updateStarDisplay('avgStars', avgRating);
+
+            // Display rating bars
+            const ratingCounts = [0, 0, 0, 0, 0];
+            reviews.forEach(r => ratingCounts[r.rating - 1]++);
+
+            const barsHtml = ratingCounts.reverse().map((count, idx) => {
+                const star = 5 - idx;
+                const percentage = totalReviews > 0 ? (count / totalReviews * 100).toFixed(0) : 0;
+                return `
+                    <div class="d-flex align-items-center mb-1">
+                        <span style="width: 60px;">${star} <i class="bi bi-star-fill text-warning"></i></span>
+                        <div class="progress flex-grow-1 mx-2" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: ${percentage}%"></div>
+                        </div>
+                        <span class="text-muted" style="width: 50px;">${count}</span>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('ratingBars').innerHTML = barsHtml;
+
+            // Display reviews
+            const reviewsHtml = reviews.map(review => `
+                <div class="card review-card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-1">${review.user?.fullName || 'Khách hàng'}</h6>
+                                <div class="review-stars">
+                                    ${Array(5).fill(0).map((_, i) =>
+                                        `<i class="bi bi-star${i < review.rating ? '-fill' : ''}"></i>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                            <small class="text-muted">${formatDate(review.createdAt)}</small>
+                        </div>
+                        ${review.title ? `<h6>${review.title}</h6>` : ''}
+                        <p class="mb-0">${review.comment}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('reviewsList').innerHTML = reviewsHtml;
+        }
+
+        function updateStarDisplay(elementId, rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+            let html = '';
+            for (let i = 0; i < fullStars; i++) html += '<i class="bi bi-star-fill"></i> ';
+            if (hasHalfStar) html += '<i class="bi bi-star-half"></i> ';
+            for (let i = 0; i < emptyStars; i++) html += '<i class="bi bi-star"></i> ';
+
+            document.getElementById(elementId).innerHTML = html;
+        }
+
+        function generateStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+            let html = '';
+            for (let i = 0; i < fullStars; i++) html += '<i class="bi bi-star-fill"></i> ';
+            if (hasHalfStar) html += '<i class="bi bi-star-half"></i> ';
+            for (let i = 0; i < emptyStars; i++) html += '<i class="bi bi-star"></i> ';
+
+            return html;
+        }
+
+        // Submit review
+        document.getElementById('reviewForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!user) {
+                alert('Vui lòng đăng nhập để đánh giá!');
+                return;
+            }
+
+            const rating = document.querySelector('input[name="rating"]:checked')?.value;
+            const title = document.getElementById('reviewTitle').value.trim();
+            const comment = document.getElementById('reviewComment').value.trim();
+
+            if (!comment) {
+                alert('Vui lòng nhập nội dung đánh giá!');
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/products/${currentProduct.id}/reviews`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        rating: parseInt(rating),
+                        title: title,
+                        comment: comment
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Cảm ơn bạn đã đánh giá!');
+                    document.getElementById('reviewForm').reset();
+                    loadReviews(currentProduct.id);
+                } else {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể gửi đánh giá'));
+                }
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                alert('Có lỗi xảy ra!');
+            }
+        });
+
+        // Load related products
+        async function loadRelatedProducts(product) {
+            try {
+                const categoryId = product.categories && product.categories.length > 0
+                    ? product.categories[0].id
+                    : null;
+
+                if (!categoryId) {
+                    document.getElementById('relatedProducts').innerHTML = '<p class="text-muted">Không có sản phẩm liên quan.</p>';
+                    return;
+                }
+
+                const response = await fetch(`/api/products/category/${categoryId}?size=4`);
+                const data = await response.json();
+                const products = data.content.filter(p => p.id !== product.id).slice(0, 4);
+
+                if (products.length === 0) {
+                    document.getElementById('relatedProducts').innerHTML = '<p class="text-muted">Không có sản phẩm liên quan.</p>';
+                    return;
+                }
+
+                const html = products.map(p => {
+                    const img = p.images && p.images.length > 0 ? p.images[0].url : 'https://via.placeholder.com/300';
+                    const prices = p.variants.map(v => v.price);
+                    const minPrice = Math.min(...prices);
+
+                    return `
+                        <div class="col-md-3">
+                            <div class="card related-product-card h-100">
+                                <img src="${img}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${p.name}">
+                                <div class="card-body">
+                                    <h6 class="card-title">${p.name}</h6>
+                                    <p class="text-primary mb-2"><strong>${formatCurrency(minPrice)}</strong></p>
+                                    <a href="/products/${p.slug}" class="btn btn-sm btn-outline-primary w-100">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('relatedProducts').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading related products:', error);
+                document.getElementById('relatedProducts').innerHTML = '<p class="text-muted">Không thể tải sản phẩm liên quan.</p>';
+            }
+        }
+
+        // Load product on page load
+        loadProductDetail();
+    </script>
+</body>
+</html>

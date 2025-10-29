@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Thương hiệu - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <style>
+        .brand-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role">Admin</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands" class="active">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/products">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-tags"></i> Quản lý Thương hiệu</h2>
+                    <p class="text-muted mb-0">Tổng số: <span id="totalBrands">0</span> thương hiệu</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#brandModal" onclick="openAddBrandModal()">
+                    <i class="bi bi-plus-circle"></i> Thêm thương hiệu mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm thương hiệu...">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="searchBrands()">
+                            <i class="bi bi-search"></i> Tìm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brands Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Logo</th>
+                                <th>Tên thương hiệu</th>
+                                <th>Slug</th>
+                                <th>Mô tả</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="brandsTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Brand Modal -->
+    <div class="modal fade" id="brandModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm thương hiệu mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="brandForm">
+                        <input type="hidden" id="brandId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên thương hiệu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="brandName" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Slug <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="brandSlug" required>
+                            <small class="text-muted">URL thân thiện (tự động tạo từ tên)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="brandDescription" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">URL Logo</label>
+                            <input type="url" class="form-control" id="brandLogoUrl" placeholder="https://example.com/logo.png">
+                            <small class="text-muted">Nhập đường dẫn URL của logo</small>
+                        </div>
+
+                        <div class="mb-3" id="logoPreview" style="display: none;">
+                            <label class="form-label">Xem trước logo</label>
+                            <div>
+                                <img id="previewImage" src="" class="img-thumbnail" style="max-width: 200px;">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBrand()">
+                        <i class="bi bi-save"></i> Lưu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Check admin authentication
+        checkAdminAccess();
+
+        const user = getUser();
+        if (user) {
+            document.getElementById('userInfo').innerHTML = `
+                <strong>${user.fullName || user.username}</strong><br>
+                <small class="badge bg-warning">ADMIN</small>
+            `;
+        }
+
+        let allBrands = [];
+
+        // Load brands on page load
+        loadBrands();
+
+        async function loadBrands() {
+            try {
+                const response = await fetch('/api/brands');
+                if (response.ok) {
+                    allBrands = await response.json();
+                    displayBrands(allBrands);
+                } else {
+                    showError('Lỗi tải danh sách thương hiệu');
+                }
+            } catch (error) {
+                console.error('Error loading brands:', error);
+                showError('Lỗi tải danh sách thương hiệu');
+            }
+        }
+
+        function displayBrands(brands) {
+            const tbody = document.getElementById('brandsTableBody');
+            document.getElementById('totalBrands').textContent = brands.length;
+
+            if (!brands || brands.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Không có thương hiệu nào</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = brands.map(brand => `
+                <tr>
+                    <td>${brand.id}</td>
+                    <td>
+                        ${brand.logo
+                            ? `<img src="${brand.logo}" class="brand-logo" alt="${brand.name}" onerror="this.src='https://via.placeholder.com/50?text=No+Logo'">`
+                            : '<i class="bi bi-image text-muted" style="font-size: 2rem;"></i>'}
+                    </td>
+                    <td><strong>${brand.name}</strong></td>
+                    <td><small class="text-muted">${brand.slug}</small></td>
+                    <td><small>${brand.description || 'Chưa có mô tả'}</small></td>
+                    <td><small>${brand.createdAt ? formatDate(brand.createdAt) : 'N/A'}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editBrand(${brand.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBrand(${brand.id}, '${brand.name.replace(/'/g, "\\'")}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function searchBrands() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = allBrands.filter(brand => {
+                return !searchText ||
+                    brand.name.toLowerCase().includes(searchText) ||
+                    (brand.description && brand.description.toLowerCase().includes(searchText)) ||
+                    brand.slug.toLowerCase().includes(searchText);
+            });
+
+            displayBrands(filtered);
+        }
+
+        function openAddBrandModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm thương hiệu mới';
+            document.getElementById('brandForm').reset();
+            document.getElementById('brandId').value = '';
+            document.getElementById('logoPreview').style.display = 'none';
+        }
+
+        async function editBrand(id) {
+            try {
+                const response = await fetch(`/api/brands/${id}`);
+                if (response.ok) {
+                    const brand = await response.json();
+
+                    document.getElementById('modalTitle').textContent = 'Chỉnh sửa thương hiệu';
+                    document.getElementById('brandId').value = brand.id;
+                    document.getElementById('brandName').value = brand.name;
+                    document.getElementById('brandSlug').value = brand.slug;
+                    document.getElementById('brandDescription').value = brand.description || '';
+                    document.getElementById('brandLogoUrl').value = brand.logoUrl || '';
+
+                    if (brand.logoUrl) {
+                        document.getElementById('previewImage').src = brand.logoUrl;
+                        document.getElementById('logoPreview').style.display = 'block';
+                    }
+
+                    new bootstrap.Modal(document.getElementById('brandModal')).show();
+                } else {
+                    alert('Không thể tải thông tin thương hiệu!');
+                }
+            } catch (error) {
+                console.error('Error loading brand:', error);
+                alert('Lỗi tải thông tin thương hiệu!');
+            }
+        }
+
+        async function saveBrand() {
+            const id = document.getElementById('brandId').value;
+            const name = document.getElementById('brandName').value.trim();
+            const slug = document.getElementById('brandSlug').value.trim();
+
+            if (!name || !slug) {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                return;
+            }
+
+            const brandData = {
+                name,
+                slug,
+                description: document.getElementById('brandDescription').value.trim(),
+                logo: document.getElementById('brandLogoUrl').value.trim()
+            };
+
+            try {
+                const url = id ? `/api/brands/${id}` : '/api/brands';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetchWithAuth(url, {
+                    method,
+                    body: JSON.stringify(brandData)
+                });
+
+                if (response.ok) {
+                    alert(id ? 'Cập nhật thương hiệu thành công!' : 'Thêm thương hiệu thành công!');
+                    bootstrap.Modal.getInstance(document.getElementById('brandModal')).hide();
+                    loadBrands();
+                } else {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể lưu thương hiệu'));
+                }
+            } catch (error) {
+                console.error('Error saving brand:', error);
+                alert('Có lỗi xảy ra khi lưu thương hiệu!');
+            }
+        }
+
+        async function deleteBrand(id, name) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa thương hiệu "${name}"?\n\nLưu ý: Các sản phẩm thuộc thương hiệu này sẽ không còn liên kết.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/brands/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Xóa thương hiệu thành công!');
+                    loadBrands();
+                } else {
+                    const error = await response.json();
+                    alert('Không thể xóa thương hiệu: ' + (error.message || 'Lỗi không xác định'));
+                }
+            } catch (error) {
+                console.error('Error deleting brand:', error);
+                alert('Có lỗi xảy ra khi xóa thương hiệu!');
+            }
+        }
+
+        function showError(message) {
+            const tbody = document.getElementById('brandsTableBody');
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">${message}</td></tr>`;
+        }
+
+        // Auto-generate slug from name
+        document.getElementById('brandName').addEventListener('input', function() {
+            const name = this.value;
+            const slug = name.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[đĐ]/g, 'd')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .trim();
+            document.getElementById('brandSlug').value = slug;
+        });
+
+        // Preview logo when URL changes
+        document.getElementById('brandLogoUrl').addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url) {
+                document.getElementById('previewImage').src = url;
+                document.getElementById('logoPreview').style.display = 'block';
+            } else {
+                document.getElementById('logoPreview').style.display = 'none';
+            }
+        });
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchBrands();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đang chuyển đến trang thanh toán...</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .redirect-container {
+            text-align: center;
+            color: white;
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .dots {
+            display: inline-block;
+        }
+        .dots::after {
+            content: '.';
+            animation: dots 1.5s steps(3, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <div class="spinner"></div>
+        <h3>Đang chuyển đến cổng thanh toán VNPay<span class="dots"></span></h3>
+        <p class="mt-3">Vui lòng chờ trong giây lát...</p>
+        <p class="text-sm mt-4" style="opacity: 0.8;">
+            <i class="bi bi-shield-check"></i> Giao dịch được bảo mật bởi VNPay
+        </p>
+    </div>
+
+    <script>
+        // Suppress VNPay console errors
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('timer')) {
+                e.preventDefault();
+                return true;
+            }
+        }, true);
+
+        // Override console.error to suppress VNPay timer errors
+        const originalError = console.error;
+        console.error = function(...args) {
+            const message = args.join(' ');
+            if (message.includes('timer') || message.includes('custom.min.js')) {
+                return; // Suppress VNPay timer errors
+            }
+            originalError.apply(console, args);
+        };
+
+        // Get payment URL from query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentUrl = urlParams.get('url');
+
+        if (paymentUrl) {
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = decodeURIComponent(paymentUrl);
+            }, 1500);
+        } else {
+            // No URL provided, redirect to error page
+            setTimeout(() => {
+                window.location.href = '/payment/error?message=No+payment+URL+provided';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
+

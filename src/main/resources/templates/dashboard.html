@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stat-card {
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .revenue-card {
+            border-left-color: #28a745;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role">Admin</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard" class="active">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/products">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+                    <p class="text-muted mb-0">Tổng quan hệ thống</p>
+                </div>
+                <div>
+                    <span id="currentTime" class="text-muted"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Tổng đơn hàng</h6>
+                                <h3 class="mb-0" id="totalOrders">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-cart3 fs-1 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Sản phẩm</h6>
+                                <h3 class="mb-0" id="totalProducts">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-box-seam fs-1 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Danh mục</h6>
+                                <h3 class="mb-0" id="totalCategories">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-grid fs-1 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Thương hiệu</h6>
+                                <h3 class="mb-0" id="totalBrands">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-tags fs-1 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Stats Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card revenue-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Doanh thu hôm nay</h6>
+                                <h4 class="mb-0 text-success" id="todayRevenue">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h4>
+                            </div>
+                            <i class="bi bi-cash-coin fs-1 text-success"></i>
+                        </div>
+                        <small class="text-muted" id="todayOrders">0 đơn hàng</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card revenue-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Doanh thu tuần này</h6>
+                                <h4 class="mb-0 text-success" id="weekRevenue">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h4>
+                            </div>
+                            <i class="bi bi-calendar-week fs-1 text-success"></i>
+                        </div>
+                        <small class="text-muted" id="weekOrders">0 đơn hàng</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card revenue-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Doanh thu tháng này</h6>
+                                <h4 class="mb-0 text-success" id="monthRevenue">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h4>
+                            </div>
+                            <i class="bi bi-calendar-month fs-1 text-success"></i>
+                        </div>
+                        <small class="text-muted" id="monthOrders">0 đơn hàng</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card revenue-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Tổng doanh thu</h6>
+                                <h4 class="mb-0 text-success" id="totalRevenue">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                </h4>
+                            </div>
+                            <i class="bi bi-graph-up-arrow fs-1 text-success"></i>
+                        </div>
+                        <small class="text-muted">Tất cả đơn hoàn thành</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Status Stats -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-pie-chart-fill"></i> Thống kê đơn hàng theo trạng thái</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <div class="text-center p-3 bg-warning bg-opacity-10 rounded">
+                                    <i class="bi bi-clock-history fs-3 text-warning d-block mb-2"></i>
+                                    <h4 class="mb-0" id="pendingOrders">0</h4>
+                                    <small class="text-muted">Chờ xử lý</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center p-3 bg-info bg-opacity-10 rounded">
+                                    <i class="bi bi-check-circle fs-3 text-info d-block mb-2"></i>
+                                    <h4 class="mb-0" id="confirmedOrders">0</h4>
+                                    <small class="text-muted">Đã xác nhận</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                                    <i class="bi bi-box-seam fs-3 text-primary d-block mb-2"></i>
+                                    <h4 class="mb-0" id="packingOrders">0</h4>
+                                    <small class="text-muted">Đang đóng gói</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center p-3 bg-primary bg-opacity-10 rounded">
+                                    <i class="bi bi-truck fs-3 text-primary d-block mb-2"></i>
+                                    <h4 class="mb-0" id="shippingOrders">0</h4>
+                                    <small class="text-muted">Đang giao</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center p-3 bg-success bg-opacity-10 rounded">
+                                    <i class="bi bi-check-circle-fill fs-3 text-success d-block mb-2"></i>
+                                    <h4 class="mb-0" id="completedOrders">0</h4>
+                                    <small class="text-muted">Hoàn thành</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="text-center p-3 bg-danger bg-opacity-10 rounded">
+                                    <i class="bi bi-x-circle-fill fs-3 text-danger d-block mb-2"></i>
+                                    <h4 class="mb-0" id="cancelledOrders">0</h4>
+                                    <small class="text-muted">Đã hủy</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> Thao tác nhanh</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <a href="/admin/products" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/admin/categories" class="btn btn-success w-100">
+                                    <i class="bi bi-plus-circle"></i> Thêm danh mục
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/admin/brands" class="btn btn-info w-100">
+                                    <i class="bi bi-plus-circle"></i> Thêm thương hiệu
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/admin/orders" class="btn btn-warning w-100">
+                                    <i class="bi bi-eye"></i> Xem đơn hàng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Doanh thu</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Data -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-box-seam"></i> Sản phẩm mới nhất</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentProductsBody">
+                                    <tr>
+                                        <td colspan="3" class="text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            Đang tải...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-cart-check"></i> Đơn hàng gần đây</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentOrdersBody">
+                                    <tr>
+                                        <td colspan="3" class="text-center">
+                                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            Đang tải...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Helper functions first
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) return '0 ₫';
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        function getOrderStatusConfig(status) {
+            const configs = {
+                PENDING: { class: 'bg-warning text-dark', text: 'Chờ xử lý' },
+                CONFIRMED: { class: 'bg-info', text: 'Đã xác nhận' },
+                PACKING: { class: 'bg-primary', text: 'Đang đóng gói' },
+                SHIPPING: { class: 'bg-primary', text: 'Đang giao' },
+                COMPLETED: { class: 'bg-success', text: 'Hoàn thành' },
+                CANCELLED: { class: 'bg-danger', text: 'Đã hủy' }
+            };
+            return configs[status] || { class: 'bg-secondary', text: status };
+        }
+
+        // Check admin access first
+        console.log('Checking admin access...');
+        if (typeof checkAdminAccess === 'function') {
+            checkAdminAccess();
+        } else {
+            console.error('checkAdminAccess function not found!');
+        }
+
+        // Display user info
+        const user = getUser();
+        console.log('User:', user);
+        if (user) {
+            document.getElementById('userInfo').innerHTML = `
+                <div class="d-flex align-items-center">
+                    <div class="bg-white rounded-circle p-2 me-2">
+                        <i class="bi bi-person-fill text-primary"></i>
+                    </div>
+                    <div>
+                        <strong>${user.fullName || user.username}</strong><br>
+                        <small class="text-white-50">${user.email || 'Admin'}</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('vi-VN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Load dashboard statistics
+        async function loadDashboardData() {
+            console.log('Loading dashboard data...');
+            try {
+                // Load products count
+                console.log('Fetching products...');
+                const productsResponse = await fetchWithAuth('/api/products?size=100');
+                console.log('Products response:', productsResponse.status);
+                if (productsResponse.ok) {
+                    const productsData = await productsResponse.json();
+                    console.log('Products data:', productsData);
+                    const products = productsData.content || productsData || [];
+                    document.getElementById('totalProducts').textContent = productsData.totalElements || products.length || 0;
+
+                    // Show recent products (first 5)
+                    const recentProducts = products.slice(0, 5);
+                    const productsHtml = recentProducts.length > 0
+                        ? recentProducts.map(p => {
+                            // Get price from first variant or show N/A
+                            let price = 'N/A';
+                            if (p.variants && p.variants.length > 0) {
+                                price = formatCurrency(p.variants[0].price);
+                            }
+                            return `
+                            <tr>
+                                <td><small>${p.name}</small></td>
+                                <td><small>${price}</small></td>
+                                <td><span class="badge bg-${p.isActive ? 'success' : 'secondary'} badge-sm">${p.isActive ? 'Hoạt động' : 'Ngừng'}</span></td>
+                            </tr>
+                        `}).join('')
+                        : '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có sản phẩm</small></td></tr>';
+                    document.getElementById('recentProductsBody').innerHTML = productsHtml;
+                } else {
+                    console.error('Failed to fetch products:', productsResponse.status);
+                    document.getElementById('totalProducts').textContent = '0';
+                    document.getElementById('recentProductsBody').innerHTML = '<tr><td colspan="3" class="text-center"><small class="text-danger">Không thể tải dữ liệu</small></td></tr>';
+                }
+
+                // Load categories count
+                console.log('Fetching categories...');
+                const categoriesResponse = await fetch('/api/categories');
+                if (categoriesResponse.ok) {
+                    const categories = await categoriesResponse.json();
+                    document.getElementById('totalCategories').textContent = categories.length || 0;
+                } else {
+                    document.getElementById('totalCategories').textContent = '0';
+                }
+
+                // Load brands count
+                console.log('Fetching brands...');
+                const brandsResponse = await fetch('/api/brands');
+                if (brandsResponse.ok) {
+                    const brands = await brandsResponse.json();
+                    document.getElementById('totalBrands').textContent = brands.length || 0;
+                } else {
+                    document.getElementById('totalBrands').textContent = '0';
+                }
+
+                // Load orders count and revenue statistics
+                console.log('Fetching orders...');
+                const ordersResponse = await fetchWithAuth('/api/orders?size=1000');
+                console.log('Orders response:', ordersResponse.status);
+                if (ordersResponse.ok) {
+                    const ordersData = await ordersResponse.json();
+                    console.log('Orders data:', ordersData);
+                    const orders = ordersData.content || ordersData || [];
+                    document.getElementById('totalOrders').textContent = ordersData.totalElements || orders.length || 0;
+
+                    // Calculate revenue statistics
+                    calculateRevenueStats(orders);
+
+                    // Calculate order status statistics
+                    calculateOrderStatusStats(orders);
+
+                    // Create revenue chart
+                    createRevenueChart(orders);
+
+                    // Show recent orders (first 5)
+                    const recentOrders = orders.slice(0, 5);
+                    const ordersHtml = recentOrders.length > 0
+                        ? recentOrders.map(o => {
+                            const statusConfig = getOrderStatusConfig(o.status);
+                            return `
+                            <tr>
+                                <td><small>${o.code}</small></td>
+                                <td><small>${o.shipName}</small></td>
+                                <td><span class="badge ${statusConfig.class} badge-sm">${statusConfig.text}</span></td>
+                            </tr>
+                        `}).join('')
+                        : '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có đơn hàng</small></td></tr>';
+                    document.getElementById('recentOrdersBody').innerHTML = ordersHtml;
+                } else {
+                    console.error('Failed to fetch orders:', ordersResponse.status);
+                    document.getElementById('totalOrders').textContent = '0';
+                    document.getElementById('recentOrdersBody').innerHTML = '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có đơn hàng</small></td></tr>';
+                    setRevenueToZero();
+                }
+
+                console.log('Dashboard data loaded successfully!');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('totalProducts').textContent = 'Lỗi';
+                document.getElementById('totalCategories').textContent = 'Lỗi';
+                document.getElementById('totalBrands').textContent = 'Lỗi';
+                document.getElementById('totalOrders').textContent = 'Lỗi';
+                setRevenueToZero();
+            }
+        }
+
+        function calculateRevenueStats(orders) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            let todayRevenue = 0, todayCount = 0;
+            let weekRevenue = 0, weekCount = 0;
+            let monthRevenue = 0, monthCount = 0;
+            let totalRevenue = 0;
+
+            orders.forEach(order => {
+                // Only count completed orders for revenue
+                if (order.status === 'COMPLETED') {
+                    const orderDate = new Date(order.createdAt || order.placedAt);
+                    const revenue = order.grandTotal || 0;
+
+                    totalRevenue += revenue;
+
+                    if (orderDate >= today) {
+                        todayRevenue += revenue;
+                        todayCount++;
+                    }
+                    if (orderDate >= weekStart) {
+                        weekRevenue += revenue;
+                        weekCount++;
+                    }
+                    if (orderDate >= monthStart) {
+                        monthRevenue += revenue;
+                        monthCount++;
+                    }
+                }
+            });
+
+            document.getElementById('todayRevenue').textContent = formatCurrency(todayRevenue);
+            document.getElementById('todayOrders').textContent = `${todayCount} đơn hàng`;
+
+            document.getElementById('weekRevenue').textContent = formatCurrency(weekRevenue);
+            document.getElementById('weekOrders').textContent = `${weekCount} đơn hàng`;
+
+            document.getElementById('monthRevenue').textContent = formatCurrency(monthRevenue);
+            document.getElementById('monthOrders').textContent = `${monthCount} đơn hàng`;
+
+            document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+        }
+
+        function calculateOrderStatusStats(orders) {
+            const stats = {
+                PENDING: 0,
+                CONFIRMED: 0,
+                PACKING: 0,
+                SHIPPING: 0,
+                COMPLETED: 0,
+                CANCELLED: 0
+            };
+
+            orders.forEach(order => {
+                if (stats.hasOwnProperty(order.status)) {
+                    stats[order.status]++;
+                }
+            });
+
+            document.getElementById('pendingOrders').textContent = stats.PENDING;
+            document.getElementById('confirmedOrders').textContent = stats.CONFIRMED;
+            document.getElementById('packingOrders').textContent = stats.PACKING;
+            document.getElementById('shippingOrders').textContent = stats.SHIPPING;
+            document.getElementById('completedOrders').textContent = stats.COMPLETED;
+            document.getElementById('cancelledOrders').textContent = stats.CANCELLED;
+        }
+
+        function createRevenueChart(orders) {
+            // Get last 7 days
+            const days = [];
+            const revenueByDay = {};
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                days.push(dateStr);
+                revenueByDay[dateStr] = 0;
+            }
+
+            // Calculate revenue for each day (only completed orders)
+            orders.forEach(order => {
+                if (order.status === 'COMPLETED' && (order.createdAt || order.placedAt)) {
+                    const orderDate = new Date(order.createdAt || order.placedAt).toISOString().split('T')[0];
+                    if (revenueByDay.hasOwnProperty(orderDate)) {
+                        revenueByDay[orderDate] += order.grandTotal || 0;
+                    }
+                }
+            });
+
+            const labels = days.map(date => {
+                const d = new Date(date);
+                return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            });
+            const data = days.map(date => revenueByDay[date]);
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Doanh thu (7 ngày gần nhất)',
+                        data: data,
+                        backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Doanh thu: ' + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setRevenueToZero() {
+            document.getElementById('todayRevenue').textContent = formatCurrency(0);
+            document.getElementById('todayOrders').textContent = '0 đơn hàng';
+            document.getElementById('weekRevenue').textContent = formatCurrency(0);
+            document.getElementById('weekOrders').textContent = '0 đơn hàng';
+            document.getElementById('monthRevenue').textContent = formatCurrency(0);
+            document.getElementById('monthOrders').textContent = '0 đơn hàng';
+            document.getElementById('totalRevenue').textContent = formatCurrency(0);
+
+            document.getElementById('pendingOrders').textContent = '0';
+            document.getElementById('confirmedOrders').textContent = '0';
+            document.getElementById('packingOrders').textContent = '0';
+            document.getElementById('shippingOrders').textContent = '0';
+            document.getElementById('completedOrders').textContent = '0';
+            document.getElementById('cancelledOrders').textContent = '0';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Load data when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadDashboardData);
+        } else {
+            loadDashboardData();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý sản phẩm - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <style>
+        .product-image-small {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role">Admin</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products" class="active">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/products">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-box-seam"></i> Quản lý Sản phẩm</h2>
+                    <p class="text-muted mb-0">Tổng số: <span id="totalProducts">0</span> sản phẩm</p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal" onclick="openAddProductModal()">
+                    <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm sản phẩm...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="brandFilter">
+                            <option value="">Tất cả thương hiệu</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="true">Đang bán</option>
+                            <option value="false">Ngừng bán</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" onclick="searchProducts()">
+                            <i class="bi bi-search"></i> Tìm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Thương hiệu</th>
+                                <th>Danh mục</th>
+                                <th>Biến thể</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTableBody">
+                            <tr>
+                                <td colspan="9" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thêm sản phẩm mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="productName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Slug <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="productSlug" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Thương hiệu</label>
+                                <select class="form-select" id="productBrand">
+                                    <option value="">Chọn thương hiệu</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Danh mục</label>
+                                <select class="form-select" id="productCategories" multiple>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="productDescription" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Chất liệu</label>
+                                <input type="text" class="form-control" id="productMaterial">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Xuất xứ</label>
+                                <input type="text" class="form-control" id="productOrigin">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="productIsActive" checked>
+                                <label class="form-check-label" for="productIsActive">
+                                    Đang bán
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh sản phẩm</label>
+                            <input type="file" class="form-control" id="productImages" multiple accept="image/*">
+                            <small class="text-muted">Chọn một hoặc nhiều ảnh (JPG, PNG, GIF). Ảnh đầu tiên sẽ là ảnh đại diện.</small>
+
+                            <!-- Image Preview -->
+                            <div id="imagePreviewContainer" class="mt-3 row g-2"></div>
+
+                            <!-- Existing Images (for edit mode) -->
+                            <div id="existingImagesContainer" class="mt-3 row g-2"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">
+                        <i class="bi bi-save"></i> Lưu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Variant Management Modal -->
+    <div class="modal fade" id="variantModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Quản lý biến thể - <span id="variantProductName"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="variantProductId">
+
+                    <!-- Add Variant Form -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><span id="variantFormTitle">Thêm biến thể mới</span></h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="variantForm">
+                                <input type="hidden" id="variantId">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">SKU <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="variantSku" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Màu sắc</label>
+                                        <div class="input-group">
+                                            <select class="form-select" id="variantColor">
+                                                <option value="">-- Chọn màu --</option>
+                                            </select>
+                                            <button class="btn btn-outline-success" type="button" onclick="openAddColorModal()" title="Thêm màu mới">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Nhấn <i class="bi bi-plus"></i> nếu chưa có màu</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Kích thước</label>
+                                        <div class="input-group">
+                                            <select class="form-select" id="variantSize">
+                                                <option value="">-- Chọn size --</option>
+                                            </select>
+                                            <button class="btn btn-outline-success" type="button" onclick="openAddSizeModal()" title="Thêm size mới">
+                                                <i class="bi bi-plus"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Nhấn <i class="bi bi-plus"></i> nếu chưa có size</small>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Giá <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="variantPrice" required min="0" step="1000">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Tồn kho <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" id="variantStock" required min="0">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="button" class="btn btn-success w-100" onclick="saveVariant()">
+                                            <i class="bi bi-save"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Variant Images Upload -->
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <label class="form-label">
+                                            <i class="bi bi-images"></i> Ảnh riêng cho biến thể này (tùy chọn)
+                                        </label>
+                                        <input type="file" class="form-control" id="variantImages" multiple accept="image/*">
+                                        <small class="text-muted">Ảnh riêng sẽ hiển thị khi khách hàng chọn màu/size này. Nếu không có, sẽ dùng ảnh chung của sản phẩm.</small>
+
+                                        <!-- Variant Image Preview -->
+                                        <div id="variantImagePreviewContainer" class="mt-2 row g-2"></div>
+
+                                        <!-- Existing Variant Images -->
+                                        <div id="variantExistingImagesContainer" class="mt-2 row g-2"></div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Variants List -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Danh sách biến thể</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>SKU</th>
+                                            <th>Màu sắc</th>
+                                            <th>Kích thước</th>
+                                            <th>Giá</th>
+                                            <th>Tồn kho</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variantsTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center">
+                                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Color Modal -->
+    <div class="modal fade" id="addColorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm màu sắc mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="colorForm">
+                        <div class="mb-3">
+                            <label class="form-label">Tên màu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="colorName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mã màu (HEX) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="colorHex" placeholder="#RRGGBB" required pattern="^#[0-9A-Fa-f]{6}$">
+                            <div class="form-text">Định dạng: #RRGGBB (ví dụ: #FF5733)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Chọn màu</label>
+                            <input type="color" class="form-control form-control-color" id="colorPicker" value="#000000" title="Chọn màu">
+                        </div>
+                        <div class="mb-3" id="colorPreview" style="display:none;">
+                            <label class="form-label">Xem trước màu</label>
+                            <div class="border rounded" id="colorPreviewBox" style="width:100%; height:50px;"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="saveColor()">
+                        <i class="bi bi-save"></i> Lưu màu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Size Modal -->
+    <div class="modal fade" id="addSizeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm kích thước mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sizeForm">
+                        <div class="mb-3">
+                            <label class="form-label">Tên kích thước <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sizeName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <input type="text" class="form-control" id="sizeNote">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSize()">
+                        <i class="bi bi-save"></i> Lưu kích thước
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Check admin authentication
+        checkAdminAccess();
+
+        const user = getUser();
+
+        // Display user info
+        if (user) {
+            document.getElementById('userInfo').innerHTML = `
+                <strong>${user.fullName || user.username}</strong><br>
+                <small class="badge bg-warning">ADMIN</small>
+            `;
+        }
+
+        let allProducts = [];
+        let brands = [];
+        let categories = [];
+        let colors = [];
+        let sizes = [];
+        let currentProductVariants = [];
+
+        // Load data
+        loadProducts();
+        loadBrands();
+        loadCategories();
+        loadColors();
+        loadSizes();
+
+        async function loadProducts() {
+            try {
+                const response = await fetchWithAuth('/api/products?size=100');
+                const data = await response.json();
+                allProducts = data.content || [];
+                displayProducts(allProducts);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showError('Lỗi tải danh sách sản phẩm');
+            }
+        }
+
+        async function loadBrands() {
+            try {
+                const response = await fetch('/api/brands');
+                brands = await response.json();
+
+                // Update brand filter
+                const brandFilter = document.getElementById('brandFilter');
+                const productBrand = document.getElementById('productBrand');
+
+                brands.forEach(brand => {
+                    brandFilter.innerHTML += `<option value="${brand.id}">${brand.name}</option>`;
+                    productBrand.innerHTML += `<option value="${brand.id}">${brand.name}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading brands:', error);
+            }
+        }
+
+        async function loadCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                categories = await response.json();
+
+                const productCategories = document.getElementById('productCategories');
+                categories.forEach(category => {
+                    productCategories.innerHTML += `<option value="${category.id}">${category.name}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function loadColors() {
+            try {
+                const response = await fetchWithAuth('/api/colors');
+                colors = await response.json();
+
+                const colorSelect = document.getElementById('variantColor');
+                colorSelect.innerHTML = '<option value="">-- Chọn màu --</option>';
+                colors.forEach(color => {
+                    colorSelect.innerHTML += `<option value="${color.id}">${color.name}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading colors:', error);
+            }
+        }
+
+        async function loadSizes() {
+            try {
+                const response = await fetchWithAuth('/api/sizes');
+                sizes = await response.json();
+
+                const sizeSelect = document.getElementById('variantSize');
+                sizeSelect.innerHTML = '<option value="">-- Chọn size --</option>';
+                sizes.forEach(size => {
+                    sizeSelect.innerHTML += `<option value="${size.id}">${size.name}</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading sizes:', error);
+            }
+        }
+
+        function displayProducts(products) {
+            const tbody = document.getElementById('productsTableBody');
+            document.getElementById('totalProducts').textContent = products.length;
+
+            if (!products || products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">Không có sản phẩm nào</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = products.map(product => {
+                const imageUrl = product.images && product.images.length > 0
+                    ? product.images[0].url
+                    : 'https://via.placeholder.com/60';
+                const brandName = product.brand ? product.brand.name : 'N/A';
+                const categoriesText = product.categories && product.categories.length > 0
+                    ? product.categories.map(c => c.name).join(', ')
+                    : 'N/A';
+                const variantCount = product.variants ? product.variants.length : 0;
+
+                // Calculate total stock and price range from variants
+                let totalStock = 0;
+                let minPrice = 0;
+                let maxPrice = 0;
+
+                if (product.variants && product.variants.length > 0) {
+                    product.variants.forEach(v => {
+                        if (v.isActive) {
+                            totalStock += v.stock || 0;
+                        }
+                    });
+
+                    const activePrices = product.variants
+                        .filter(v => v.isActive && v.price)
+                        .map(v => parseFloat(v.price));
+
+                    if (activePrices.length > 0) {
+                        minPrice = Math.min(...activePrices);
+                        maxPrice = Math.max(...activePrices);
+                    }
+                }
+
+                // Price display
+                let priceDisplay = 'Chưa có giá';
+                if (minPrice > 0) {
+                    if (minPrice === maxPrice) {
+                        priceDisplay = formatCurrency(minPrice);
+                    } else {
+                        priceDisplay = `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
+                    }
+                }
+
+                // Stock status badge
+                let stockBadge = '';
+                if (!product.isActive) {
+                    stockBadge = '<span class="badge bg-secondary">Ngừng bán</span>';
+                } else if (totalStock === 0) {
+                    stockBadge = '<span class="badge bg-danger"><i class="bi bi-x-circle"></i> Hết hàng</span>';
+                } else if (totalStock < 10) {
+                    stockBadge = `<span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle"></i> Còn ${totalStock}</span>`;
+                } else {
+                    stockBadge = `<span class="badge bg-success"><i class="bi bi-check-circle"></i> Còn ${totalStock}</span>`;
+                }
+
+                const statusBadge = product.isActive
+                    ? '<span class="badge bg-success">Đang bán</span>'
+                    : '<span class="badge bg-secondary">Ngừng bán</span>';
+
+                return `
+                    <tr>
+                        <td>${product.id}</td>
+                        <td><img src="${imageUrl}" class="product-image-small rounded" onerror="this.src='https://via.placeholder.com/60'"></td>
+                        <td>
+                            <strong>${product.name}</strong><br>
+                            <small class="text-muted">${product.slug}</small>
+                        </td>
+                        <td>${brandName}</td>
+                        <td><small>${categoriesText}</small></td>
+                        <td>
+                            <span class="badge bg-info">${variantCount} biến thể</span><br>
+                            <small class="text-primary"><strong>${priceDisplay}</strong></small><br>
+                            ${stockBadge}
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td><small>${formatDate(product.createdAt)}</small></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="editProduct(${product.id})" title="Sửa">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.id})" title="Xóa">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="manageVariants(${product.id}, '${product.name.replace(/'/g, "\\'")}')">
+                                <i class="bi bi-gear"></i> Biến thể
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function searchProducts() {
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const brandId = document.getElementById('brandFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            let filtered = allProducts.filter(product => {
+                const matchSearch = !searchText ||
+                    product.name.toLowerCase().includes(searchText) ||
+                    (product.description && product.description.toLowerCase().includes(searchText));
+
+                const matchBrand = !brandId || (product.brand && product.brand.id == brandId);
+
+                const matchStatus = !status || product.isActive.toString() === status;
+
+                return matchSearch && matchBrand && matchStatus;
+            });
+
+            displayProducts(filtered);
+        }
+
+        function openAddProductModal() {
+            document.getElementById('modalTitle').textContent = 'Thêm sản phẩm mới';
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('productIsActive').checked = true;
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            document.getElementById('existingImagesContainer').innerHTML = '';
+        }
+
+        async function editProduct(id) {
+            try {
+                const response = await fetch(`/api/products/${id}`);
+                const product = await response.json();
+
+                document.getElementById('modalTitle').textContent = 'Chỉnh sửa sản phẩm';
+                document.getElementById('productId').value = product.id;
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productSlug').value = product.slug;
+                document.getElementById('productDescription').value = product.description || '';
+                document.getElementById('productMaterial').value = product.material || '';
+                document.getElementById('productOrigin').value = product.origin || '';
+                document.getElementById('productIsActive').checked = product.isActive;
+
+                if (product.brand) {
+                    document.getElementById('productBrand').value = product.brand.id;
+                }
+
+                // Set categories
+                const categorySelect = document.getElementById('productCategories');
+                Array.from(categorySelect.options).forEach(option => {
+                    option.selected = product.categories.some(c => c.id == option.value);
+                });
+
+                // Show existing images
+                const existingImagesContainer = document.getElementById('existingImagesContainer');
+                existingImagesContainer.innerHTML = '';
+                if (product.images && product.images.length > 0) {
+                    product.images.forEach((image, index) => {
+                        const col = document.createElement('div');
+                        col.className = 'col-auto';
+                        col.innerHTML = `
+                            <div class="position-relative">
+                                <img src="${image.url}" class="img-thumbnail rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="deleteProductImage(${image.id})" title="Xóa ảnh">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                                ${index === 0 ? '<span class="badge bg-success position-absolute bottom-0 start-0 m-1">Ảnh chính</span>' : ''}
+                            </div>
+                        `;
+                        existingImagesContainer.appendChild(col);
+                    });
+                }
+
+                new bootstrap.Modal(document.getElementById('productModal')).show();
+            } catch (error) {
+                console.error('Error loading product:', error);
+                showError('Lỗi tải thông tin sản phẩm');
+            }
+        }
+
+        async function saveProduct() {
+            const id = document.getElementById('productId').value;
+            const name = document.getElementById('productName').value;
+            const slug = document.getElementById('productSlug').value;
+
+            if (!name || !slug) {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                return;
+            }
+
+            const categorySelect = document.getElementById('productCategories');
+            const selectedCategories = Array.from(categorySelect.selectedOptions).map(opt => parseInt(opt.value));
+
+            const productData = {
+                name,
+                slug,
+                description: document.getElementById('productDescription').value,
+                material: document.getElementById('productMaterial').value,
+                origin: document.getElementById('productOrigin').value,
+                isActive: document.getElementById('productIsActive').checked,
+                brandId: document.getElementById('productBrand').value || null,
+                categoryIds: selectedCategories
+            };
+
+            try {
+                // Step 1: Create/Update product
+                const url = id ? `/api/products/${id}` : '/api/products';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetchWithAuth(url, {
+                    method,
+                    body: JSON.stringify(productData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể lưu sản phẩm'));
+                    return;
+                }
+
+                const savedProduct = await response.json();
+                const productId = savedProduct.id;
+
+                // Step 2: Upload images if any
+                const imageFiles = document.getElementById('productImages').files;
+                if (imageFiles.length > 0) {
+                    const formData = new FormData();
+                    for (let i = 0; i < imageFiles.length; i++) {
+                        formData.append('files', imageFiles[i]);
+                    }
+
+                    try {
+                        const uploadResponse = await fetchWithAuth(`/api/product-images/upload/${productId}`, {
+                            method: 'POST',
+                            body: formData
+                            // Don't set Content-Type header - let browser set it with boundary
+                        });
+
+                        if (!uploadResponse.ok) {
+                            const errorText = await uploadResponse.text();
+                            console.error('Upload error:', errorText);
+                            alert('Sản phẩm đã lưu nhưng có lỗi khi tải ảnh lên: ' + errorText);
+                        }
+                    } catch (uploadError) {
+                        console.error('Upload exception:', uploadError);
+                        alert('Sản phẩm đã lưu nhưng có lỗi khi tải ảnh lên: ' + uploadError.message);
+                    }
+                }
+
+                alert(id ? 'Cập nhật sản phẩm thành công!' : 'Thêm sản phẩm thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+                loadProducts();
+            } catch (error) {
+                console.error('Error saving product:', error);
+                alert('Có lỗi xảy ra khi lưu sản phẩm!');
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/products/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Xóa sản phẩm thành công!');
+                    loadProducts();
+                } else {
+                    alert('Không thể xóa sản phẩm!');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                alert('Có lỗi xảy ra khi xóa sản phẩm!');
+            }
+        }
+
+        // Manage product variants
+        async function manageVariants(productId, productName) {
+            document.getElementById('variantProductId').value = productId;
+            document.getElementById('variantProductName').textContent = productName;
+            document.getElementById('variantForm').reset();
+            document.getElementById('variantId').value = '';
+            document.getElementById('variantFormTitle').textContent = 'Thêm biến thể mới';
+            document.getElementById('variantImages').value = '';
+            document.getElementById('variantImagePreviewContainer').innerHTML = '';
+            document.getElementById('variantExistingImagesContainer').innerHTML = '';
+
+            await loadProductVariants(productId);
+            new bootstrap.Modal(document.getElementById('variantModal')).show();
+        }
+
+        async function loadProductVariants(productId) {
+            try {
+                const response = await fetchWithAuth(`/api/product-variants/product/${productId}`);
+                if (response.ok) {
+                    currentProductVariants = await response.json();
+                    displayVariants(currentProductVariants);
+                } else {
+                    document.getElementById('variantsTableBody').innerHTML =
+                        '<tr><td colspan="7" class="text-center">Không thể tải biến thể</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading variants:', error);
+                document.getElementById('variantsTableBody').innerHTML =
+                    '<tr><td colspan="7" class="text-center text-danger">Lỗi tải biến thể</td></tr>';
+            }
+        }
+
+        function displayVariants(variants) {
+            const tbody = document.getElementById('variantsTableBody');
+
+            if (!variants || variants.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Chưa có biến thể nào</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = variants.map(v => `
+                <tr>
+                    <td><strong>${v.sku}</strong></td>
+                    <td>${v.color ? `<span class="badge" style="background-color: ${v.color.hex || '#6c757d'}">${v.color.name}</span>` : 'N/A'}</td>
+                    <td>${v.size ? v.size.name : 'N/A'}</td>
+                    <td><strong>${formatCurrency(v.price)}</strong></td>
+                    <td><span class="badge ${v.stock > 10 ? 'bg-success' : v.stock > 0 ? 'bg-warning' : 'bg-danger'}">${v.stock}</span></td>
+                    <td>${v.isActive ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-secondary">Ngừng</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editVariant(${v.id})" title="Sửa">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteVariant(${v.id})" title="Xóa">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function saveVariant() {
+            const variantId = document.getElementById('variantId').value;
+            const productId = document.getElementById('variantProductId').value;
+            const sku = document.getElementById('variantSku').value.trim();
+            const price = document.getElementById('variantPrice').value;
+            const stock = document.getElementById('variantStock').value;
+
+            if (!sku || !price || !stock) {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                return;
+            }
+
+            const variantData = {
+                productId: parseInt(productId),
+                sku,
+                colorId: document.getElementById('variantColor').value || null,
+                sizeId: document.getElementById('variantSize').value || null,
+                price: parseFloat(price),
+                stock: parseInt(stock),
+                isActive: true
+            };
+
+            try {
+                // Step 1: Create/Update variant
+                const url = variantId ? `/api/product-variants/${variantId}` : '/api/product-variants';
+                const method = variantId ? 'PUT' : 'POST';
+
+                const response = await fetchWithAuth(url, {
+                    method,
+                    body: JSON.stringify(variantData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể lưu biến thể'));
+                    return;
+                }
+
+                const savedVariant = await response.json();
+                const savedVariantId = savedVariant.id;
+
+                // Step 2: Upload variant images if any
+                const variantImageFiles = document.getElementById('variantImages').files;
+                if (variantImageFiles.length > 0) {
+                    const formData = new FormData();
+                    for (let i = 0; i < variantImageFiles.length; i++) {
+                        formData.append('files', variantImageFiles[i]);
+                    }
+
+                    try {
+                        const uploadResponse = await fetchWithAuth(`/api/product-images/upload/${productId}?variantId=${savedVariantId}`, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!uploadResponse.ok) {
+                            const errorText = await uploadResponse.text();
+                            console.error('Upload variant images error:', errorText);
+                            alert('Biến thể đã lưu nhưng có lỗi khi tải ảnh lên!');
+                        }
+                    } catch (uploadError) {
+                        console.error('Upload variant images exception:', uploadError);
+                        alert('Biến thể đã lưu nhưng có lỗi khi tải ảnh lên: ' + uploadError.message);
+                    }
+                }
+
+                alert(variantId ? 'Cập nhật biến thể thành công!' : 'Thêm biến thể thành công!');
+
+                // Reset form and clear images
+                document.getElementById('variantForm').reset();
+                document.getElementById('variantId').value = '';
+                document.getElementById('variantImages').value = '';
+                document.getElementById('variantImagePreviewContainer').innerHTML = '';
+                document.getElementById('variantExistingImagesContainer').innerHTML = '';
+
+                await loadProductVariants(productId);
+                await loadProducts(); // Reload to update variant count
+            } catch (error) {
+                console.error('Error saving variant:', error);
+                alert('Có lỗi xảy ra khi lưu biến thể!');
+            }
+        }
+
+        async function editVariant(id) {
+            try {
+                const response = await fetchWithAuth(`/api/product-variants/${id}`);
+                if (response.ok) {
+                    const variant = await response.json();
+
+                    // Change form title
+                    document.getElementById('variantFormTitle').textContent = 'Chỉnh sửa biến thể';
+
+                    document.getElementById('variantId').value = variant.id;
+                    document.getElementById('variantSku').value = variant.sku;
+                    document.getElementById('variantColor').value = variant.color?.id || '';
+                    document.getElementById('variantSize').value = variant.size?.id || '';
+                    document.getElementById('variantPrice').value = variant.price;
+                    document.getElementById('variantStock').value = variant.stock;
+
+                    // Clear preview containers
+                    document.getElementById('variantImagePreviewContainer').innerHTML = '';
+                    document.getElementById('variantImages').value = '';
+
+                    // Load variant images from product images
+                    const productId = document.getElementById('variantProductId').value;
+                    const imagesResponse = await fetchWithAuth(`/api/product-images/product/${productId}`);
+
+                    if (imagesResponse.ok) {
+                        const allImages = await imagesResponse.json();
+                        // Filter images that belong to this variant
+                        const variantImages = allImages.filter(img => img.variantId == id);
+
+                        const variantExistingImagesContainer = document.getElementById('variantExistingImagesContainer');
+                        variantExistingImagesContainer.innerHTML = '';
+
+                        if (variantImages && variantImages.length > 0) {
+                            variantImages.forEach((image, index) => {
+                                const col = document.createElement('div');
+                                col.className = 'col-auto';
+                                col.innerHTML = `
+                                    <div class="position-relative">
+                                        <img src="${image.url}" class="img-thumbnail rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="deleteVariantImage(${image.id})" title="Xóa ảnh">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                        ${index === 0 ? '<span class="badge bg-info position-absolute bottom-0 start-0 m-1">Ảnh 1</span>' : ''}
+                                    </div>
+                                `;
+                                variantExistingImagesContainer.appendChild(col);
+                            });
+                        }
+                    }
+
+                    // Scroll to form
+                    document.querySelector('.card.mb-3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    alert('Không thể tải thông tin biến thể!');
+                }
+            } catch (error) {
+                console.error('Error loading variant:', error);
+                alert('Lỗi tải thông tin biến thể!');
+            }
+        }
+
+        // Reset variant form when opening modal
+        async function manageVariants(productId, productName) {
+            document.getElementById('variantProductId').value = productId;
+            document.getElementById('variantProductName').textContent = productName;
+            document.getElementById('variantForm').reset();
+            document.getElementById('variantId').value = '';
+            document.getElementById('variantFormTitle').textContent = 'Thêm biến thể mới';
+            document.getElementById('variantImages').value = '';
+            document.getElementById('variantImagePreviewContainer').innerHTML = '';
+            document.getElementById('variantExistingImagesContainer').innerHTML = '';
+
+            await loadProductVariants(productId);
+            new bootstrap.Modal(document.getElementById('variantModal')).show();
+        }
+
+        // Open Add Color Modal
+        function openAddColorModal() {
+            document.getElementById('colorForm').reset();
+            document.getElementById('colorPreview').style.display = 'none';
+            new bootstrap.Modal(document.getElementById('addColorModal')).show();
+        }
+
+        // Open Add Size Modal
+        function openAddSizeModal() {
+            document.getElementById('sizeForm').reset();
+            new bootstrap.Modal(document.getElementById('addSizeModal')).show();
+        }
+
+        // Color picker event listener
+        document.getElementById('colorPicker').addEventListener('input', function(e) {
+            const hexValue = e.target.value;
+            document.getElementById('colorHex').value = hexValue;
+            document.getElementById('colorPreview').style.display = 'block';
+            document.getElementById('colorPreviewBox').style.backgroundColor = hexValue;
+        });
+
+        // Hex input event listener
+        document.getElementById('colorHex').addEventListener('input', function(e) {
+            const hexValue = e.target.value;
+            if (/^#[0-9A-F]{6}$/i.test(hexValue)) {
+                document.getElementById('colorPicker').value = hexValue;
+                document.getElementById('colorPreview').style.display = 'block';
+                document.getElementById('colorPreviewBox').style.backgroundColor = hexValue;
+            }
+        });
+
+        // Save Color
+        async function saveColor() {
+            const name = document.getElementById('colorName').value.trim();
+            const hexCode = document.getElementById('colorHex').value.trim() || document.getElementById('colorPicker').value;
+
+            if (!name) {
+                alert('Vui lòng nhập tên màu!');
+                return;
+            }
+
+            if (!hexCode) {
+                alert('Vui lòng nhập mã màu HEX!');
+                return;
+            }
+
+            const colorData = {
+                name: name,
+                hexCode: hexCode  // Changed from 'hex' to 'hexCode' to match backend
+            };
+
+            try {
+                const response = await fetchWithAuth('/api/colors', {
+                    method: 'POST',
+                    body: JSON.stringify(colorData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+
+                    // Check if there are validation errors
+                    if (error.validationErrors && Object.keys(error.validationErrors).length > 0) {
+                        let errorMessage = 'Lỗi nhập liệu:\n';
+                        for (const [field, message] of Object.entries(error.validationErrors)) {
+                            errorMessage += `- ${message}\n`;
+                        }
+                        alert(errorMessage);
+                    } else {
+                        alert('Lỗi: ' + (error.message || 'Không thể thêm màu'));
+                    }
+                    return;
+                }
+
+                const newColor = await response.json();
+
+                alert('Thêm màu sắc thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('addColorModal')).hide();
+
+                // Reload colors and update select
+                await loadColors();
+
+                // Select the newly added color
+                document.getElementById('variantColor').value = newColor.id;
+            } catch (error) {
+                console.error('Error saving color:', error);
+                alert('Có lỗi xảy ra khi thêm màu!');
+            }
+        }
+
+        // Save Size
+        async function saveSize() {
+            const name = document.getElementById('sizeName').value.trim();
+            const note = document.getElementById('sizeNote').value.trim();
+
+            if (!name) {
+                alert('Vui lòng nhập tên kích thước!');
+                return;
+            }
+
+            const sizeData = {
+                name: name,
+                note: note || null
+            };
+
+            try {
+                const response = await fetchWithAuth('/api/sizes', {
+                    method: 'POST',
+                    body: JSON.stringify(sizeData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert('Lỗi: ' + (error.message || 'Không thể thêm kích thước'));
+                    return;
+                }
+
+                alert('Thêm kích thước thành công!');
+                bootstrap.Modal.getInstance(document.getElementById('addSizeModal')).hide();
+
+                // Reload sizes and update select
+                await loadSizes();
+
+                // Select the newly added size
+                document.getElementById('variantSize').value = newSize.id;
+            } catch (error) {
+                console.error('Error saving size:', error);
+                alert('Có lỗi xảy ra khi thêm kích thước!');
+            }
+        }
+
+        // Delete product image
+        async function deleteProductImage(imageId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/product-images/${imageId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Xóa ảnh thành công!');
+                    // Reload the product to refresh images
+                    const productId = document.getElementById('productId').value;
+                    if (productId) {
+                        await editProduct(productId);
+                    }
+                } else {
+                    alert('Không thể xóa ảnh!');
+                }
+            } catch (error) {
+                console.error('Error deleting image:', error);
+                alert('Có lỗi xảy ra khi xóa ảnh!');
+            }
+        }
+
+        // Delete variant image
+        async function deleteVariantImage(imageId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa ảnh này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/product-images/${imageId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Xóa ảnh thành công!');
+                    // Reload the variant to refresh images
+                    const variantId = document.getElementById('variantId').value;
+                    if (variantId) {
+                        await editVariant(variantId);
+                    }
+                } else {
+                    alert('Không thể xóa ảnh!');
+                }
+            } catch (error) {
+                console.error('Error deleting variant image:', error);
+                alert('Có lỗi xảy ra khi xóa ảnh!');
+            }
+        }
+
+        // Delete variant
+        async function deleteVariant(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa biến thể này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth(`/api/product-variants/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Xóa biến thể thành công!');
+                    const productId = document.getElementById('variantProductId').value;
+                    await loadProductVariants(productId);
+                    await loadProducts(); // Reload to update variant count
+                } else {
+                    alert('Không thể xóa biến thể!');
+                }
+            } catch (error) {
+                console.error('Error deleting variant:', error);
+                alert('Có lỗi xảy ra khi xóa biến thể!');
+            }
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/auth/login';
+        }
+    </script>
+</body>
+</html>

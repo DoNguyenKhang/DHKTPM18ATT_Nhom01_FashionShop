@@ -1,0 +1,95 @@
+### AI Chatbot Product Consultant - API Test Examples
+
+# 1. Chat đơn giản
+POST http://localhost:8080/api/ai/chat
+Content-Type: application/json
+
+"Xin chào, bạn có thể giúp tôi tìm quần áo không?"
+
+###
+
+# 2. Chat với Product Context - Tìm sản phẩm cụ thể
+POST http://localhost:8080/api/ai/chat/product
+Content-Type: application/json
+
+"Tôi muốn tìm áo sơ mi màu xanh size M giá khoảng 500-700k"
+
+###
+
+# 3. Tìm kiếm sản phẩm và nhận tư vấn
+GET http://localhost:8080/api/ai/search?keyword=áo&limit=5
+
+###
+
+# 4. Tìm áo thun
+GET http://localhost:8080/api/ai/search?keyword=áo thun&limit=5
+
+###
+
+# 5. Tìm quần jean
+GET http://localhost:8080/api/ai/search?keyword=quần jean&limit=5
+
+###
+
+# 6. Tư vấn theo thương hiệu (giả sử brandId = 1)
+GET http://localhost:8080/api/ai/brand/1?question=Có áo nào dưới 500k&limit=5
+
+###
+
+# 7. Tư vấn theo thương hiệu - Sản phẩm mới nhất
+GET http://localhost:8080/api/ai/brand/1?question=Sản phẩm mới nhất là gì&limit=5
+
+###
+
+# 8. Tư vấn theo danh mục (giả sử categoryId = 5)
+GET http://localhost:8080/api/ai/category/5?question=Size nào phổ biến nhất&limit=5
+
+###
+
+# 9. Tư vấn theo danh mục - Màu sắc
+GET http://localhost:8080/api/ai/category/5?question=Có những màu nào&limit=10
+
+###
+
+# 10. Health Check
+GET http://localhost:8080/api/ai/health
+
+###
+
+# 11. Chat với context phức tạp
+POST http://localhost:8080/api/ai/chat/product
+Content-Type: application/json
+
+"Tôi cao 1m70, nặng 65kg, làm văn phòng. Tư vấn giúp tôi 5 sản phẩm áo sơ mi phù hợp"
+
+###
+
+# 12. Tìm kiếm với từ khóa tiếng Việt có dấu
+GET http://localhost:8080/api/ai/search?keyword=áo phông&limit=5
+
+###
+
+# 13. Hỏi về giá cả
+POST http://localhost:8080/api/ai/chat/product
+Content-Type: application/json
+
+"Gợi ý 5 sản phẩm áo trong tầm giá dưới 300k"
+
+###
+
+# 14. Hỏi về màu sắc
+POST http://localhost:8080/api/ai/chat/product
+Content-Type: application/json
+
+"Tôi thích màu đen và xám, có 5 sản phẩm áo nào phù hợp không?"
+
+###
+
+# 15. Hỏi về kích thước
+POST http://localhost:8080/api/ai/chat/product
+Content-Type: application/json
+
+"Size L có những sản phẩm áo nào? Gợi ý 5 sản phẩm"
+
+###
+
