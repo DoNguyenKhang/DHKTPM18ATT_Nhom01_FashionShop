@@ -776,8 +776,42 @@
 
         // Initialize page
         updateNavigation();
-        loadFilters();
-        loadProducts(0);
+        loadFilters().then(() => {
+            // Check for category slug in URL parameters
+            handleUrlParameters();
+        });
+
+        // Handle URL parameters for category filtering
+        async function handleUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const categorySlug = urlParams.get('category');
+
+            if (categorySlug) {
+                console.log('Loading category by slug:', categorySlug);
+                try {
+                    // Fetch category by slug to get its ID
+                    const response = await fetch(`/api/categories/slug/${categorySlug}`);
+                    console.log('Category API response status:', response.status);
+                    if (response.ok) {
+                        const category = await response.json();
+                        console.log('Category found:', category);
+                        // Set the category filter
+                        document.getElementById('categoryFilter').value = category.id;
+                        currentFilters.categoryId = category.id;
+                        updateActiveFilters();
+                        loadProducts(0);
+                        return;
+                    } else {
+                        console.warn('Category not found with slug:', categorySlug);
+                    }
+                } catch (error) {
+                    console.error('Error loading category by slug:', error);
+                }
+            }
+
+            // If no category slug or loading failed, load all products
+            loadProducts(0);
+        }
     </script>
 </body>
 </html>

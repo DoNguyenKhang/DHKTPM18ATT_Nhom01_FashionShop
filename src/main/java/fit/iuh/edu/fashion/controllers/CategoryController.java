@@ -43,6 +43,13 @@ public class CategoryController {
         return ResponseEntity.ok(mapToCategoryResponse(category));
     }
 
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<CategoryResponse> getCategoryBySlug(@PathVariable String slug) {
+        Category category = categoryRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Category not found with slug: " + slug));
+        return ResponseEntity.ok(mapToCategoryResponse(category));
+    }
+
     @GetMapping("/{id}/children")
     public ResponseEntity<List<CategoryResponse>> getChildCategories(@PathVariable Long id) {
         List<CategoryResponse> children = categoryRepository.findByParentId(id).stream()
