@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Thanh toán - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .stat-card {
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .stat-card.success {
+            border-left-color: #28a745;
+        }
+        .stat-card.pending {
+            border-left-color: #ffc107;
+        }
+        .stat-card.failed {
+            border-left-color: #dc3545;
+        }
+        .stat-card.total {
+            border-left-color: #007bff;
+        }
+        .payment-table {
+            font-size: 0.9rem;
+        }
+        .badge-payment {
+            padding: 0.4em 0.8em;
+            font-size: 0.85em;
+        }
+        .transaction-detail {
+            background-color: #f8f9fa;
+            border-left: 3px solid #007bff;
+            padding: 10px;
+            margin-top: 5px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role" id="userRole">Đang tải...</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/payments" class="active">
+                <i class="bi bi-credit-card"></i> Quản lý Thanh toán
+            </a>
+            <a href="/admin/coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/audit-logs">
+                <i class="bi bi-file-text"></i> Nhật ký hoạt động
+            </a>
+            <a href="/admin/system-monitor" id="menu-system-monitor">
+                <i class="bi bi-activity"></i> Giám sát Hệ thống
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/products">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <h2><i class="bi bi-credit-card"></i> Quản lý Thanh toán</h2>
+            <p class="text-muted mb-0">Giám sát và quản lý các giao dịch thanh toán</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card total">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Tổng thanh toán</h6>
+                                <h3 class="mb-0" id="totalPayments">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-wallet2 fs-1 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Thành công</h6>
+                                <h3 class="mb-0" id="completedPayments">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-check-circle fs-1 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card pending">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Đang chờ</h6>
+                                <h3 class="mb-0" id="pendingPayments">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-clock-history fs-1 text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card failed">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Tổng doanh thu</h6>
+                                <h3 class="mb-0" id="totalAmount">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                </h3>
+                            </div>
+                            <i class="bi bi-currency-dollar fs-1 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-12 mb-2">
+                        <button class="btn btn-warning me-2" onclick="showPendingCOD()">
+                            <i class="bi bi-cash-coin"></i> COD đang chờ xác nhận
+                        </button>
+                        <button class="btn btn-info" onclick="showStatisticsByMethod()">
+                            <i class="bi bi-bar-chart"></i> Thống kê theo phương thức
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" id="filterStatus">
+                            <option value="">Tất cả</option>
+                            <option value="COMPLETED">Thành công</option>
+                            <option value="PENDING">Đang chờ</option>
+                            <option value="FAILED">Thất bại</option>
+                            <option value="REFUNDED">Đã hoàn tiền</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Phương thức</label>
+                        <select class="form-select" id="filterMethod">
+                            <option value="">Tất cả</option>
+                            <option value="COD">COD</option>
+                            <option value="VNPAY">VNPay</option>
+                            <option value="MOMO">MoMo</option>
+                            <option value="ZALOPAY">ZaloPay</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" class="form-control" id="searchInput"
+                               placeholder="Mã đơn hàng, Transaction ID...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100" onclick="applyFilters()">
+                            <i class="bi bi-search"></i> Lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Danh sách Thanh toán</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i> Làm mới
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover payment-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Mã đơn hàng</th>
+                                <th>Phương thức</th>
+                                <th>Số tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Transaction ID</th>
+                                <th>Thời gian</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation" class="mt-3">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <!-- Pagination will be generated by JS -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Detail Modal -->
+    <div class="modal fade" id="paymentDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết Thanh toán</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="paymentDetailContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending COD Modal -->
+    <div class="modal fade" id="pendingCODModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-cash-coin"></i> Thanh toán COD đang chờ xác nhận
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="pendingCODContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div class="modal fade" id="statisticsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-bar-chart"></i> Thống kê thanh toán theo phương thức
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="statisticsContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        let currentPage = 0;
+        let totalPages = 0;
+        let allPayments = [];
+        let filteredPayments = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check order/payment management access (ADMIN or STAFF_SALES only)
+            if (!checkOrderAccess()) {
+                return;
+            }
+
+            // Load user info
+            const user = getUser();
+            if (user) {
+                document.getElementById('userRole').textContent = getUserRoleDisplay();
+                document.querySelector('.user-name').textContent = user.fullName || user.email;
+            }
+
+            loadStatistics();
+            loadPayments();
+        });
+
+        function getRoleName(roles) {
+            if (!roles || roles.length === 0) return 'User';
+            const role = roles[0].name;
+            const roleMap = {
+                'ADMIN': 'Quản trị viên',
+                'STAFF_SALES': 'Nhân viên bán hàng',
+                'STAFF_PRODUCT': 'Nhân viên sản phẩm',
+                'CUSTOMER': 'Khách hàng'
+            };
+            return roleMap[role] || role;
+        }
+
+        function loadStatistics() {
+            fetchWithAuth('/api/payments/statistics')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalPayments').textContent = data.totalPayments || 0;
+                document.getElementById('completedPayments').textContent = data.completedPayments || 0;
+                document.getElementById('pendingPayments').textContent = data.pendingPayments || 0;
+                document.getElementById('totalAmount').textContent = formatCurrency(data.totalAmount || 0);
+            })
+            .catch(error => {
+                console.error('Error loading statistics:', error);
+            });
+        }
+
+        function loadPayments() {
+            fetchWithAuth(`/api/payments?page=${currentPage}&size=50`)
+            .then(response => response.json())
+            .then(data => {
+                allPayments = data.payments || [];
+                totalPages = data.totalPages || 1;
+                filteredPayments = allPayments;
+                renderPayments();
+                renderPagination();
+            })
+            .catch(error => {
+                console.error('Error loading payments:', error);
+                showError('Không thể tải danh sách thanh toán');
+            });
+        }
+
+        function renderPayments() {
+            const tbody = document.getElementById('paymentsTableBody');
+
+            if (filteredPayments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">Không có dữ liệu</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredPayments.map(payment => `
+                <tr>
+                    <td>#${payment.id}</td>
+                    <td>
+                        <strong>${payment.order.code}</strong>
+                    </td>
+                    <td>${getPaymentMethodBadge(payment.paymentMethod)}</td>
+                    <td><strong>${formatCurrency(payment.amount)}</strong></td>
+                    <td>${getStatusBadge(payment.status)}</td>
+                    <td>
+                        ${payment.transactionId
+                            ? `<code>${payment.transactionId}</code>`
+                            : '<span class="text-muted">-</span>'}
+                    </td>
+                    <td>${formatDateTime(payment.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary"
+                                onclick="viewPaymentDetail(${payment.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            let html = '';
+
+            if (currentPage > 0) {
+                html += `<li class="page-item">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Trước</a>
+                </li>`;
+            }
+
+            for (let i = 0; i < totalPages; i++) {
+                if (i < 3 || i >= totalPages - 3 || Math.abs(i - currentPage) <= 2) {
+                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changePage(${i})">${i + 1}</a>
+                    </li>`;
+                } else if (i === 3 || i === totalPages - 4) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            if (currentPage < totalPages - 1) {
+                html += `<li class="page-item">
+                    <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Sau</a>
+                </li>`;
+            }
+
+            pagination.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadPayments();
+            return false;
+        }
+
+        function applyFilters() {
+            const status = document.getElementById('filterStatus').value;
+            const method = document.getElementById('filterMethod').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredPayments = allPayments.filter(payment => {
+                let matches = true;
+
+                if (status && payment.status !== status) {
+                    matches = false;
+                }
+
+                if (method && payment.paymentMethod !== method) {
+                    matches = false;
+                }
+
+                if (search) {
+                    const searchableText = `
+                        ${payment.order.code}
+                        ${payment.transactionId || ''}
+                        ${payment.bankCode || ''}
+                    `.toLowerCase();
+
+                    if (!searchableText.includes(search)) {
+                        matches = false;
+                    }
+                }
+
+                return matches;
+            });
+
+            renderPayments();
+        }
+
+        function viewPaymentDetail(paymentId) {
+            const modal = new bootstrap.Modal(document.getElementById('paymentDetailModal'));
+
+            document.getElementById('paymentDetailContent').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            `;
+
+            modal.show();
+
+            fetchWithAuth(`/api/payments/${paymentId}`)
+            .then(response => response.json())
+            .then(data => {
+                // Data is now a PaymentDetailDTO
+                const payment = data;
+                const transaction = data.transaction;
+                const order = data.order;
+
+                let html = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Thông tin thanh toán</h6>
+                            <table class="table table-sm">
+                                <tr><th>ID:</th><td>#${payment.id}</td></tr>
+                                <tr><th>Mã đơn hàng:</th><td><strong>${order.code}</strong></td></tr>
+                                <tr><th>Phương thức:</th><td>${getPaymentMethodBadge(payment.paymentMethod)}</td></tr>
+                                <tr><th>Số tiền:</th><td><strong>${formatCurrency(payment.amount)}</strong></td></tr>
+                                <tr><th>Trạng thái:</th><td>${getStatusBadge(payment.status)}</td></tr>
+                                <tr><th>Mã giao dịch:</th><td>${payment.transactionId || '-'}</td></tr>
+                                <tr><th>Mã ngân hàng:</th><td>${payment.bankCode || '-'}</td></tr>
+                                <tr><th>Response Code:</th><td>${payment.responseCode || '-'}</td></tr>
+                                <tr><th>Thời gian tạo:</th><td>${formatDateTime(payment.createdAt)}</td></tr>
+                                <tr><th>Hoàn thành:</th><td>${payment.completedAt ? formatDateTime(payment.completedAt) : '-'}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Thông tin đơn hàng</h6>
+                            <table class="table table-sm">
+                                <tr><th>Khách hàng:</th><td>${order.customer ? (order.customer.fullName || order.customer.email) : '-'}</td></tr>
+                                <tr><th>Email:</th><td>${order.customer ? order.customer.email : '-'}</td></tr>
+                                <tr><th>SĐT:</th><td>${order.customer && order.customer.phone ? order.customer.phone : '-'}</td></tr>
+                                <tr><th>Tổng tiền:</th><td><strong>${formatCurrency(order.grandTotal)}</strong></td></tr>
+                                <tr><th>Trạng thái đơn:</th><td>${getOrderStatusBadge(order.status)}</td></tr>
+                                <tr><th>Địa chỉ:</th><td>${order.shipLine1}, ${order.shipCity}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                if (transaction) {
+                    html += `
+                        <hr>
+                        <h6>Chi tiết giao dịch VNPay</h6>
+                        <table class="table table-sm">
+                            <tr><th>Transaction No:</th><td>${transaction.transactionId || '-'}</td></tr>
+                            <tr><th>Bank Tran No:</th><td>${transaction.bankTranNo || '-'}</td></tr>
+                            <tr><th>Card Type:</th><td>${transaction.cardType || '-'}</td></tr>
+                            <tr><th>Pay Date:</th><td>${transaction.payDate || '-'}</td></tr>
+                            <tr><th>Transaction Type:</th><td>${transaction.transactionType || '-'}</td></tr>
+                            <tr><th>Status:</th><td>${getTransactionStatusBadge(transaction.status)}</td></tr>
+                        </table>
+                    `;
+                }
+
+                // Hiển thị thông tin thanh toán
+                if (payment.paymentInfo) {
+                    html += `
+                        <hr>
+                        <h6>Thông tin thêm</h6>
+                        <div class="alert alert-info">
+                            ${payment.paymentInfo.replace(/\n/g, '<br>')}
+                        </div>
+                    `;
+                }
+
+                // Nút xác nhận thanh toán COD (chỉ hiển thị cho Admin/Staff và khi thanh toán COD đang pending)
+                if (payment.paymentMethod === 'COD' && payment.status === 'PENDING') {
+                    html += `
+                        <hr>
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <strong>Thanh toán COD chưa được xác nhận</strong>
+                            <p class="mb-0 mt-2">Khi nhân viên giao hàng đã nhận được tiền từ khách hàng, vui lòng xác nhận thanh toán bên dưới.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success" onclick="confirmCODPayment(${payment.id})">
+                                <i class="bi bi-check-circle"></i> Xác nhận đã thu tiền
+                            </button>
+                            <button class="btn btn-danger" onclick="failCODPayment(${payment.id})">
+                                <i class="bi bi-x-circle"></i> Đánh dấu thất bại
+                            </button>
+                        </div>
+                    `;
+                } else if (payment.paymentMethod === 'COD' && payment.status === 'COMPLETED') {
+                    html += `
+                        <hr>
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <strong>Thanh toán COD đã được xác nhận</strong>
+                            <p class="mb-0 mt-2">Đã nhận tiền từ khách hàng lúc: ${formatDateTime(payment.completedAt)}</p>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('paymentDetailContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading payment details:', error);
+                document.getElementById('paymentDetailContent').innerHTML =
+                    '<div class="alert alert-danger">Không thể tải thông tin chi tiết. Vui lòng thử lại sau.</div>';
+            });
+        }
+
+        function refreshData() {
+            loadStatistics();
+            loadPayments();
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'COMPLETED': '<span class="badge badge-payment bg-success">Thành công</span>',
+                'PENDING': '<span class="badge badge-payment bg-warning">Đang chờ</span>',
+                'FAILED': '<span class="badge badge-payment bg-danger">Thất bại</span>',
+                'REFUNDED': '<span class="badge badge-payment bg-info">Đã hoàn tiền</span>'
+            };
+            return badges[status] || status;
+        }
+
+        function getTransactionStatusBadge(status) {
+            const badges = {
+                'SUCCESS': '<span class="badge bg-success">Thành công</span>',
+                'FAILED': '<span class="badge bg-danger">Thất bại</span>',
+                'PENDING': '<span class="badge bg-warning">Đang xử lý</span>',
+                'CANCELLED': '<span class="badge bg-secondary">Đã hủy</span>',
+                'REFUNDED': '<span class="badge bg-info">Đã hoàn tiền</span>'
+            };
+            return badges[status] || status;
+        }
+
+        function getOrderStatusBadge(status) {
+            const badges = {
+                'PENDING': '<span class="badge bg-warning">Chờ xác nhận</span>',
+                'CONFIRMED': '<span class="badge bg-info">Đã xác nhận</span>',
+                'PACKING': '<span class="badge bg-primary">Đang đóng gói</span>',
+                'SHIPPING': '<span class="badge bg-primary">Đang giao</span>',
+                'COMPLETED': '<span class="badge bg-success">Hoàn thành</span>',
+                'CANCELLED': '<span class="badge bg-danger">Đã hủy</span>',
+                'REFUNDED': '<span class="badge bg-secondary">Đã hoàn tiền</span>'
+            };
+            return badges[status] || status;
+        }
+
+        function getPaymentMethodBadge(method) {
+            const badges = {
+                'COD': '<span class="badge bg-secondary">COD</span>',
+                'VNPAY': '<span class="badge bg-primary">VNPay</span>',
+                'MOMO': '<span class="badge bg-danger">MoMo</span>',
+                'ZALOPAY': '<span class="badge bg-info">ZaloPay</span>'
+            };
+            return badges[method] || method;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        function formatDateTime(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleString('vi-VN');
+        }
+
+        function showError(message) {
+            alert(message);
+        }
+
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('show');
+        }
+
+        function logout() {
+            clearAuthData();
+            window.location.href = '/login';
+        }
+
+        // Xác nhận thanh toán COD
+        function confirmCODPayment(paymentId) {
+            if (!confirm('Bạn có chắc chắn đã nhận được tiền từ khách hàng?')) {
+                return;
+            }
+
+            const note = prompt('Ghi chú (tùy chọn):');
+            const requestBody = note ? { note: note } : {};
+
+            fetchWithAuth(`/api/payments/${paymentId}/confirm-cod`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                }
+                // Đóng modal và refresh dữ liệu
+                bootstrap.Modal.getInstance(document.getElementById('paymentDetailModal')).hide();
+                refreshData();
+            })
+            .catch(error => {
+                console.error('Error confirming COD payment:', error);
+                alert('Lỗi khi xác nhận thanh toán. Vui lòng thử lại.');
+            });
+        }
+
+        // Đánh dấu thanh toán COD thất bại
+        function failCODPayment(paymentId) {
+            const reason = prompt('Nhập lý do thất bại:');
+            if (!reason) {
+                return;
+            }
+
+            fetchWithAuth(`/api/payments/${paymentId}/fail-cod`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason: reason })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                }
+                // Đóng modal và refresh dữ liệu
+                bootstrap.Modal.getInstance(document.getElementById('paymentDetailModal')).hide();
+                refreshData();
+            })
+            .catch(error => {
+                console.error('Error failing COD payment:', error);
+                alert('Lỗi khi đánh dấu thất bại. Vui lòng thử lại.');
+            });
+        }
+
+        // Hiển thị danh sách COD đang chờ xác nhận
+        function showPendingCOD() {
+            const modal = new bootstrap.Modal(document.getElementById('pendingCODModal'));
+
+            document.getElementById('pendingCODContent').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            `;
+
+            modal.show();
+
+            fetchWithAuth('/api/payments/cod/pending')
+            .then(response => response.json())
+            .then(data => {
+                const payments = data.payments || [];
+
+                if (payments.length === 0) {
+                    document.getElementById('pendingCODContent').innerHTML = `
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Không có thanh toán COD nào đang chờ xác nhận.
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Có ${payments.length} thanh toán COD đang chờ xác nhận</strong>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Số tiền</th>
+                                    <th>Thời gian</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                payments.forEach(payment => {
+                    html += `
+                        <tr>
+                            <td><strong>${payment.order.code}</strong></td>
+                            <td>
+                                ${payment.order.customer ? payment.order.customer.fullName || payment.order.customer.email : '-'}<br>
+                                <small class="text-muted">${payment.order.customer ? payment.order.customer.phone || '' : ''}</small>
+                            </td>
+                            <td><strong>${formatCurrency(payment.amount)}</strong></td>
+                            <td>${formatDateTime(payment.createdAt)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="confirmCODPaymentQuick(${payment.id})">
+                                    <i class="bi bi-check"></i> Xác nhận
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewPaymentDetail(${payment.id})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                document.getElementById('pendingCODContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading pending COD:', error);
+                document.getElementById('pendingCODContent').innerHTML = `
+                    <div class="alert alert-danger">Không thể tải danh sách. Vui lòng thử lại.</div>
+                `;
+            });
+        }
+
+        // Xác nhận COD nhanh (không cần mở modal detail)
+        function confirmCODPaymentQuick(paymentId) {
+            if (!confirm('Bạn có chắc chắn đã nhận được tiền từ khách hàng?')) {
+                return;
+            }
+
+            fetchWithAuth(`/api/payments/${paymentId}/confirm-cod`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                }
+                // Đóng modal pending COD và refresh
+                const modal = bootstrap.Modal.getInstance(document.getElementById('pendingCODModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                refreshData();
+            })
+            .catch(error => {
+                console.error('Error confirming COD payment:', error);
+                alert('Lỗi khi xác nhận thanh toán. Vui lòng thử lại.');
+            });
+        }
+
+        // Hiển thị thống kê theo phương thức thanh toán
+        function showStatisticsByMethod() {
+            const modal = new bootstrap.Modal(document.getElementById('statisticsModal'));
+
+            document.getElementById('statisticsContent').innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+            `;
+
+            modal.show();
+
+            fetchWithAuth('/api/payments/statistics/by-method')
+            .then(response => response.json())
+            .then(data => {
+                const stats = data.statistics || {};
+
+                let html = '<div class="row g-3">';
+
+                Object.keys(stats).forEach(method => {
+                    const methodStats = stats[method];
+                    const completedCount = methodStats.completed || 0;
+                    const pendingCount = methodStats.pending || 0;
+                    const failedCount = methodStats.failed || 0;
+                    const totalAmount = methodStats.totalAmount || 0;
+                    const totalCount = methodStats.count || 0;
+
+                    html += `
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">${getPaymentMethodBadge(method)} ${method}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table table-sm mb-0">
+                                        <tr>
+                                            <th>Tổng giao dịch:</th>
+                                            <td><strong>${totalCount}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Thành công:</th>
+                                            <td><span class="badge bg-success">${completedCount}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Đang chờ:</th>
+                                            <td><span class="badge bg-warning">${pendingCount}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Thất bại:</th>
+                                            <td><span class="badge bg-danger">${failedCount}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Tổng doanh thu:</th>
+                                            <td><strong class="text-success">${formatCurrency(totalAmount)}</strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+
+                document.getElementById('statisticsContent').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error loading statistics:', error);
+                document.getElementById('statisticsContent').innerHTML = `
+                    <div class="alert alert-danger">Không thể tải thống kê. Vui lòng thử lại.</div>
+                `;
+            });
+        }
+
+        // Auto refresh every 30 seconds
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>
+

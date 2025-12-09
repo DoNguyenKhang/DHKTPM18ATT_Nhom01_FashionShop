@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - Fashion Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role" id="userRole">Đang tải...</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products" id="menu-products">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories" id="menu-categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands" id="menu-brands">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders" id="menu-orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/payments">
+                <i class="bi bi-credit-card"></i> Quản lý Thanh toán
+            </a>
+            <a href="/admin/coupons" id="menu-coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users" id="menu-users">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/audit-logs" id="menu-audit-logs" class="active">
+                <i class="bi bi-file-text"></i> Nhật ký hoạt động
+            </a>
+            <a href="/admin/system-monitor" id="menu-system-monitor">
+                <i class="bi bi-activity"></i> Giám sát Hệ thống
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <h2><i class="bi bi-file-text"></i> Nhật Ký Hoạt Động (Audit Logs)</h2>
+            <p class="text-muted mb-0">Theo dõi mọi hoạt động trong hệ thống</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng Logs</h5>
+                        <h2 class="text-primary" id="totalLogs">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Hoạt động 24h</h5>
+                        <h2 class="text-info" id="recentActivity">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Lỗi</h5>
+                        <h2 class="text-danger" id="failedActions">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Đăng nhập</h5>
+                        <h2 class="text-success" id="loginAttempts">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="User, IP, URL...">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Hành động</label>
+                        <select class="form-select" id="actionFilter">
+                            <option value="">Tất cả</option>
+                            <option value="LOGIN">Đăng nhập</option>
+                            <option value="LOGOUT">Đăng xuất</option>
+                            <option value="REGISTER">Đăng ký</option>
+                            <option value="CREATE">Tạo mới</option>
+                            <option value="UPDATE">Cập nhật</option>
+                            <option value="UPDATE_STATUS">Cập nhật trạng thái</option>
+                            <option value="UPDATE_PAYMENT_METHOD">Đổi phương thức TT</option>
+                            <option value="DELETE">Xóa</option>
+                            <option value="CANCEL">Hủy</option>
+                            <option value="REFUND">Hoàn tiền</option>
+                            <option value="CHANGE_PASSWORD">Đổi mật khẩu</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Entity</label>
+                        <select class="form-select" id="entityFilter">
+                            <option value="">Tất cả</option>
+                            <option value="User">User</option>
+                            <option value="Product">Product</option>
+                            <option value="Order">Order</option>
+                            <option value="Coupon">Coupon</option>
+                            <option value="Category">Category</option>
+                            <option value="Brand">Brand</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">Tất cả</option>
+                            <option value="SUCCESS">Success</option>
+                            <option value="FAILED">Failed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary flex-fill" onclick="loadLogs()">
+                                <i class="bi bi-search"></i> Lọc
+                            </button>
+                            <button class="btn btn-secondary" onclick="clearFilters()">
+                                <i class="bi bi-x-circle"></i> Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Danh sách Logs</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>User</th>
+                                <th>Hành động</th>
+                                <th>Entity</th>
+                                <th>IP Address</th>
+                                <th>Trạng thái</th>
+                                <th>Chi tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border" role="status"></div>
+                                    <p>Đang tải dữ liệu...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <nav>
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Detail Modal -->
+    <div class="modal fade" id="logDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi Tiết Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="logDetailBody">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Check admin access
+        checkAdminAccess();
+
+        let currentPage = 0;
+        const pageSize = 20;
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const response = await fetchWithAuth('/api/audit-logs/statistics');
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('totalLogs').textContent = stats.totalLogs.toLocaleString();
+                    document.getElementById('recentActivity').textContent = stats.recentActivity.toLocaleString();
+                    document.getElementById('failedActions').textContent = stats.failedActions.toLocaleString();
+                    document.getElementById('loginAttempts').textContent = stats.loginAttempts.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Load logs
+        async function loadLogs(page = 0) {
+            currentPage = page;
+
+            const search = document.getElementById('searchInput').value;
+            const action = document.getElementById('actionFilter').value;
+            const entity = document.getElementById('entityFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            let url = `/api/audit-logs?page=${page}&size=${pageSize}`;
+
+            // Apply filters
+            const params = new URLSearchParams();
+            if (search) params.append('search', search);
+            if (action) params.append('action', action);
+            if (entity) params.append('entityType', entity);
+            if (status) params.append('status', status);
+
+            if (params.toString()) {
+                url += '&' + params.toString();
+            }
+
+            try {
+                const response = await fetchWithAuth(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderLogs(data.content);
+                    renderPagination(data);
+                }
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                document.getElementById('logsTableBody').innerHTML = `
+                    <tr><td colspan="7" class="text-center text-danger">Lỗi khi tải dữ liệu</td></tr>
+                `;
+            }
+        }
+
+        function renderLogs(logs) {
+            const tbody = document.getElementById('logsTableBody');
+
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Không có dữ liệu</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td><small>${formatDateTime(log.createdAt)}</small></td>
+                    <td>
+                        ${log.username ? `<strong>${log.username}</strong>` : '<span class="text-muted">Hệ thống</span>'}
+                        ${log.userId ? `<br><small class="text-muted">ID: ${log.userId}</small>` : ''}
+                    </td>
+                    <td><span class="badge bg-${getActionColor(log.action)}">${formatAction(log.action)}</span></td>
+                    <td>
+                        ${log.entityType || '<span class="text-muted">-</span>'}
+                        ${log.entityId ? `<br><small class="text-muted">#${log.entityId}</small>` : ''}
+                    </td>
+                    <td>
+                        ${log.ipAddress ? `<small><code>${log.ipAddress}</code></small>` : '<span class="text-muted">Internal</span>'}
+                    </td>
+                    <td><span class="badge bg-${log.status === 'SUCCESS' ? 'success' : 'danger'}">${log.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewLogDetail(${log.id})" title="Xem chi tiết">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatAction(action) {
+            const actions = {
+                'LOGIN': 'Đăng nhập',
+                'LOGOUT': 'Đăng xuất',
+                'REGISTER': 'Đăng ký',
+                'CREATE': 'Tạo mới',
+                'UPDATE': 'Cập nhật',
+                'DELETE': 'Xóa',
+                'CHANGE_PASSWORD': 'Đổi mật khẩu',
+                'UPDATE_STATUS': 'Cập nhật trạng thái',
+                'UPDATE_PAYMENT_METHOD': 'Đổi phương thức thanh toán',
+                'CANCEL': 'Hủy',
+                'REFUND': 'Hoàn tiền'
+            };
+            return actions[action] || action;
+        }
+
+        function getActionColor(action) {
+            const colors = {
+                'LOGIN': 'success',
+                'LOGOUT': 'secondary',
+                'REGISTER': 'primary',
+                'CREATE': 'info',
+                'UPDATE': 'warning',
+                'DELETE': 'danger',
+                'CHANGE_PASSWORD': 'dark',
+                'UPDATE_STATUS': 'warning',
+                'UPDATE_PAYMENT_METHOD': 'info',
+                'CANCEL': 'danger',
+                'REFUND': 'warning'
+            };
+            return colors[action] || 'secondary';
+        }
+
+        function renderPagination(data) {
+            const pagination = document.getElementById('pagination');
+            const totalPages = data.totalPages;
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Previous
+            html += `<li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="loadLogs(${currentPage - 1}); return false;">Previous</a>
+            </li>`;
+
+            // Pages
+            for (let i = 0; i < totalPages; i++) {
+                if (i === 0 || i === totalPages - 1 || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadLogs(${i}); return false;">${i + 1}</a>
+                    </li>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                }
+            }
+
+            // Next
+            html += `<li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" onclick="loadLogs(${currentPage + 1}); return false;">Next</a>
+            </li>`;
+
+            pagination.innerHTML = html;
+        }
+
+        async function viewLogDetail(id) {
+            try {
+                const response = await fetchWithAuth(`/api/audit-logs/${id}`);
+                if (response.ok) {
+                    const log = await response.json();
+                    showLogDetail(log);
+                }
+            } catch (error) {
+                console.error('Error loading log detail:', error);
+            }
+        }
+
+        function showLogDetail(log) {
+            const body = document.getElementById('logDetailBody');
+            body.innerHTML = `
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6 class="text-primary"><i class="bi bi-info-circle"></i> Thông Tin Chung</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr><td><strong>ID:</strong></td><td>${log.id}</td></tr>
+                            <tr><td><strong>User:</strong></td><td>${log.username || '<span class="text-muted">Hệ thống</span>'} ${log.userId ? `<span class="badge bg-secondary">ID: ${log.userId}</span>` : ''}</td></tr>
+                            <tr><td><strong>Hành động:</strong></td><td><span class="badge bg-${getActionColor(log.action)}">${formatAction(log.action)}</span></td></tr>
+                            <tr><td><strong>Entity:</strong></td><td>${log.entityType || '-'} ${log.entityId ? `<span class="badge bg-info">#${log.entityId}</span>` : ''}</td></tr>
+                            <tr><td><strong>Trạng thái:</strong></td><td><span class="badge bg-${log.status === 'SUCCESS' ? 'success' : 'danger'}">${log.status}</span></td></tr>
+                            <tr><td><strong>Thời gian:</strong></td><td><i class="bi bi-clock"></i> ${formatDateTime(log.createdAt)}</td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary"><i class="bi bi-pc-display"></i> Thông Tin Kỹ Thuật</h6>
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td><strong>IP Address:</strong></td>
+                                <td>${log.ipAddress ? `<code>${log.ipAddress}</code>` : '<span class="text-muted">Internal/Service Call</span>'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Method:</strong></td>
+                                <td>${log.requestMethod ? `<code>${log.requestMethod}</code>` : '<span class="text-muted">-</span>'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>URL:</strong></td>
+                                <td>${log.requestUrl ? `<code class="text-break">${log.requestUrl}</code>` : '<span class="text-muted">-</span>'}</td>
+                            </tr>
+                        </table>
+                        ${log.userAgent ? `
+                            <div class="mt-2">
+                                <strong>User Agent:</strong>
+                                <div class="bg-light p-2 rounded mt-1">
+                                    <small class="text-muted">${log.userAgent}</small>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                ${(log.oldValue || log.newValue) ? `
+                    <hr>
+                    <h6 class="text-primary"><i class="bi bi-file-diff"></i> Thay Đổi Dữ Liệu</h6>
+                    <div class="row">
+                        ${log.oldValue ? `
+                            <div class="col-md-6">
+                                <strong class="text-danger"><i class="bi bi-dash-circle"></i> Giá Trị Cũ:</strong>
+                                <pre class="bg-light p-2 rounded mt-1 border"><code>${log.oldValue}</code></pre>
+                            </div>
+                        ` : ''}
+                        ${log.newValue ? `
+                            <div class="col-md-${log.oldValue ? '6' : '12'}">
+                                <strong class="text-success"><i class="bi bi-plus-circle"></i> Giá Trị Mới:</strong>
+                                <pre class="bg-light p-2 rounded mt-1 border"><code>${log.newValue}</code></pre>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+
+                ${log.errorMessage ? `
+                    <hr>
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Lỗi</h6>
+                        <p class="mb-0">${log.errorMessage}</p>
+                    </div>
+                ` : ''}
+
+                ${!log.ipAddress && !log.requestMethod && !log.requestUrl ? `
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Lưu ý:</strong> Hành động này được thực hiện từ bên trong hệ thống (service layer),
+                        không phải từ HTTP request trực tiếp nên không có thông tin IP/URL.
+                    </div>
+                ` : ''}
+            `;
+            new bootstrap.Modal(document.getElementById('logDetailModal')).show();
+        }
+
+        function formatDateTime(dateTime) {
+            if (!dateTime) return 'N/A';
+            const date = new Date(dateTime);
+            return date.toLocaleString('vi-VN');
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('actionFilter').value = '';
+            document.getElementById('entityFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            loadLogs();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('show');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        // Display user info
+        const user = getUser();
+        if (user) {
+            const roleDisplay = getUserRoleDisplay();
+            document.getElementById('userRole').textContent = roleDisplay;
+            document.querySelector('.user-name').textContent = user.fullName || user.email;
+        }
+
+        // Load initial data
+        loadStatistics();
+        loadLogs();
+    </script>
+</body>
+</html>
+

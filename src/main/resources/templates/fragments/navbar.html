@@ -1,0 +1,200 @@
+<!-- Modern Unified Navigation Component -->
+<!-- Include this in all pages using: <div th:replace="~{fragments/navbar :: navbar}"></div> -->
+
+<nav class="navbar navbar-expand-lg navbar-custom sticky-top" th:fragment="navbar">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-bag-heart-fill"></i> Fashion Shop
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Left Navigation -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/" th:classappend="${#httpServletRequest.requestURI == '/' ? 'active' : ''}">
+                        <i class="bi bi-house-door"></i> Trang chủ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products" th:classappend="${#httpServletRequest.requestURI.contains('/products') ? 'active' : ''}">
+                        <i class="bi bi-grid"></i> Sản phẩm
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-tags"></i> Danh mục
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/products?category=nam"><i class="bi bi-person"></i> Thời trang Nam</a></li>
+                        <li><a class="dropdown-item" href="/products?category=nu"><i class="bi bi-person-dress"></i> Thời trang Nữ</a></li>
+                        <li><a class="dropdown-item" href="/products?category=tre-em"><i class="bi bi-stars"></i> Trẻ em</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/products?sale=true"><i class="bi bi-percent"></i> Sale</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- Search Bar (Desktop) -->
+            <div class="navbar-search d-none d-lg-block mx-3">
+                <input type="text" class="form-control" id="navbarSearch" placeholder="Tìm kiếm sản phẩm...">
+                <i class="bi bi-search search-icon"></i>
+            </div>
+
+            <!-- Right Navigation -->
+            <ul class="navbar-nav align-items-lg-center">
+                <!-- Cart (User Only) -->
+                <li class="nav-item" id="cartNav" style="display: none;">
+                    <a class="nav-link position-relative" href="/cart">
+                        <i class="bi bi-bag"></i> Giỏ hàng
+                        <span class="badge" id="cartCount" style="display: none;">0</span>
+                    </a>
+                </li>
+
+                <!-- Orders (User Only) -->
+                <li class="nav-item" id="ordersNav" style="display: none;">
+                    <a class="nav-link" href="/orders">
+                        <i class="bi bi-receipt"></i> Đơn hàng
+                    </a>
+                </li>
+
+                <!-- Dashboard (Admin/Staff Only) -->
+                <li class="nav-item" id="dashboardNav" style="display: none;">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+
+                <!-- Login Button -->
+                <li class="nav-item" id="loginNav">
+                    <a class="nav-link btn-login" href="/login">
+                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                    </a>
+                </li>
+
+                <!-- Register Button -->
+                <li class="nav-item ms-2" id="registerNav">
+                    <a class="nav-link btn-register" href="/register">
+                        <i class="bi bi-person-plus"></i> Đăng ký
+                    </a>
+                </li>
+
+                <!-- User Dropdown -->
+                <li class="nav-item dropdown" id="userDropdown" style="display: none;">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> <span id="userName"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="/profile">
+                                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/orders">
+                                <i class="bi bi-bag-check"></i> Đơn hàng của tôi
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="logout(); return false;">
+                                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Search Suggestions Overlay (for navbar search) -->
+<div class="search-suggestions" id="navbarSearchSuggestions" style="display: none;">
+    <!-- Populated by JavaScript -->
+</div>
+
+<script>
+// Navbar scroll effect
+window.addEventListener('scroll', function() {
+    const navbar = document.querySelector('.navbar-custom');
+    if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+    } else {
+        navbar.classList.remove('scrolled');
+    }
+});
+
+// Check user login status and update navbar
+function updateNavbar() {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (token && user.id) {
+        // Hide login/register buttons
+        document.getElementById('loginNav').style.display = 'none';
+        document.getElementById('registerNav').style.display = 'none';
+
+        // Show user dropdown
+        document.getElementById('userDropdown').style.display = 'block';
+        document.getElementById('userName').textContent = user.fullName || user.email;
+
+        // Show cart and orders for regular users
+        if (user.role === 'USER') {
+            document.getElementById('cartNav').style.display = 'block';
+            document.getElementById('ordersNav').style.display = 'block';
+            updateCartCount();
+        }
+
+        // Show dashboard for admin/staff
+        if (user.role === 'ADMIN' || user.role?.startsWith('STAFF_')) {
+            document.getElementById('dashboardNav').style.display = 'block';
+        }
+    } else {
+        // Show login/register buttons
+        document.getElementById('loginNav').style.display = 'block';
+        document.getElementById('registerNav').style.display = 'block';
+
+        // Hide user-specific items
+        document.getElementById('userDropdown').style.display = 'none';
+        document.getElementById('cartNav').style.display = 'none';
+        document.getElementById('ordersNav').style.display = 'none';
+        document.getElementById('dashboardNav').style.display = 'none';
+    }
+}
+
+// Update cart count
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const cartCountEl = document.getElementById('cartCount');
+    if (cart.length > 0) {
+        cartCountEl.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCountEl.style.display = 'inline';
+    } else {
+        cartCountEl.style.display = 'none';
+    }
+}
+
+// Logout function
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('cart');
+    window.location.href = '/';
+}
+
+// Initialize navbar on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateNavbar();
+});
+
+// Listen for storage changes (for cart updates)
+window.addEventListener('storage', function(e) {
+    if (e.key === 'cart' || e.key === 'user') {
+        updateNavbar();
+    }
+});
+</script>
+

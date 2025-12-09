@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giám Sát Hệ Thống - Fashion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <style>
+        .metric-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .progress-bar-animated {
+            animation: progress-bar-stripes 1s linear infinite;
+        }
+        .status-badge {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+        }
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i> Menu
+    </button>
+
+    <!-- Admin Sidebar -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <h4><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h4>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <small class="user-role" id="userRole">Đang tải...</small>
+            <div class="user-name">Đang tải...</div>
+        </div>
+
+        <nav>
+            <a href="/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+
+            <div class="nav-section-title">QUẢN LÝ</div>
+
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/categories">
+                <i class="bi bi-grid"></i> Quản lý Danh mục
+            </a>
+            <a href="/admin/brands">
+                <i class="bi bi-tags"></i> Quản lý Thương hiệu
+            </a>
+            <a href="/admin/orders">
+                <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/admin/payments">
+                <i class="bi bi-credit-card"></i> Quản lý Thanh toán
+            </a>
+            <a href="/admin/coupons">
+                <i class="bi bi-tag"></i> Quản lý Mã giảm giá
+            </a>
+            <a href="/admin/users">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/audit-logs">
+                <i class="bi bi-file-text"></i> Nhật ký hoạt động
+            </a>
+            <a href="/admin/system-monitor" class="active">
+                <i class="bi bi-activity"></i> Giám sát Hệ thống
+            </a>
+
+            <hr>
+
+            <a href="/profile">
+                <i class="bi bi-person-badge"></i> Thông tin cá nhân
+            </a>
+            <a href="/products">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+            <a href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main-content">
+        <div class="page-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-activity"></i> Giám Sát Hệ Thống</h2>
+                    <p class="text-muted mb-0">Theo dõi sức khỏe và hiệu suất hệ thống</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="loadSystemHealth()">
+                        <i class="bi bi-arrow-clockwise"></i> Làm mới
+                    </button>
+                    <span class="ms-2 text-muted" id="lastUpdate"></span>
+                </div>
+            </div>
+        </div>
+
+                <!-- System Status Alert -->
+                <div id="systemStatusAlert" class="alert d-none" role="alert"></div>
+
+                <!-- System Info Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card metric-card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2">Thời gian hoạt động</h6>
+                                        <div class="metric-value" id="uptime">-</div>
+                                    </div>
+                                    <i class="bi bi-clock-history" style="font-size: 3rem; opacity: 0.5;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card metric-card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2">User Online</h6>
+                                        <div class="metric-value" id="activeUsers">-</div>
+                                    </div>
+                                    <i class="bi bi-people-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card metric-card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2">Đơn hôm nay</h6>
+                                        <div class="metric-value" id="todayOrders">-</div>
+                                    </div>
+                                    <i class="bi bi-cart-check-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card metric-card bg-warning text-dark">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-subtitle mb-2">CPU Cores</h6>
+                                        <div class="metric-value" id="cpuCores">-</div>
+                                    </div>
+                                    <i class="bi bi-cpu" style="font-size: 3rem; opacity: 0.5;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resource Usage -->
+                <div class="row mb-4">
+                    <!-- Memory Usage -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card metric-card">
+                            <div class="card-header bg-primary text-white">
+                                <i class="bi bi-memory"></i> Bộ Nhớ (RAM)
+                            </div>
+                            <div class="card-body">
+                                <h5 id="memoryUsageText">-</h5>
+                                <div class="progress" style="height: 30px;">
+                                    <div id="memoryProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 0%">0%</div>
+                                </div>
+                                <small class="text-muted mt-2 d-block" id="memoryDetail">-</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disk Usage -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card metric-card">
+                            <div class="card-header bg-success text-white">
+                                <i class="bi bi-hdd"></i> Ổ Đĩa
+                            </div>
+                            <div class="card-body">
+                                <h5 id="diskUsageText">-</h5>
+                                <div class="progress" style="height: 30px;">
+                                    <div id="diskProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                         role="progressbar" style="width: 0%">0%</div>
+                                </div>
+                                <small class="text-muted mt-2 d-block" id="diskDetail">-</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Information -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="card metric-card">
+                            <div class="card-header bg-info text-white">
+                                <i class="bi bi-info-circle"></i> Thông Tin Hệ Thống
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Java Version:</strong></td>
+                                        <td id="javaVersion">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>OS:</strong></td>
+                                        <td id="osInfo">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Architecture:</strong></td>
+                                        <td id="osArch">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Threads:</strong></td>
+                                        <td id="threadInfo">-</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Database Statistics -->
+                    <div class="col-md-6 mb-3">
+                        <div class="card metric-card">
+                            <div class="card-header bg-warning text-dark">
+                                <i class="bi bi-database"></i> Thống Kê Database
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><i class="bi bi-people"></i> <strong>Users:</strong></td>
+                                        <td id="dbUsers" class="text-end">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="bi bi-cart"></i> <strong>Orders:</strong></td>
+                                        <td id="dbOrders" class="text-end">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="bi bi-box"></i> <strong>Products:</strong></td>
+                                        <td id="dbProducts" class="text-end">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="bi bi-credit-card"></i> <strong>Payments:</strong></td>
+                                        <td id="dbPayments" class="text-end">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="bi bi-clock-history"></i> <strong>Audit Logs:</strong></td>
+                                        <td id="dbAuditLogs" class="text-end">-</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+    <!-- Floating Refresh Button -->
+    <button class="btn btn-primary btn-lg rounded-circle refresh-btn" onclick="loadSystemHealth()" title="Làm mới">
+        <i class="bi bi-arrow-clockwise"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/auth.js"></script>
+    <script>
+        // Check admin access (ADMIN only for system monitoring)
+        checkUserManagementAccess();
+        const user = getUser();
+
+        // Display user info
+        if (user) {
+            const roleDisplay = getUserRoleDisplay();
+            document.getElementById('userRole').textContent = roleDisplay;
+            document.querySelector('.user-name').textContent = user.fullName || user.email;
+        }
+
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            document.getElementById('adminSidebar').classList.toggle('show');
+        }
+
+        async function loadSystemHealth() {
+            try {
+                const response = await fetchWithAuth('/api/system/health');
+
+                if (!response.ok) {
+                    throw new Error('Failed to load system health');
+                }
+
+                const data = await response.json();
+                displaySystemHealth(data);
+                updateLastUpdateTime();
+            } catch (error) {
+                console.error('Error loading system health:', error);
+                showError('Không thể tải thông tin hệ thống!');
+            }
+        }
+
+        function displaySystemHealth(data) {
+            // Status Alert
+            const alertDiv = document.getElementById('systemStatusAlert');
+            alertDiv.className = `alert alert-${getStatusColor(data.status)}`;
+            alertDiv.textContent = data.message;
+            alertDiv.classList.remove('d-none');
+
+            // Quick Stats
+            document.getElementById('uptime').textContent = formatUptime(data.uptime);
+            document.getElementById('activeUsers').textContent = formatNumber(data.activeUsers);
+            document.getElementById('todayOrders').textContent = formatNumber(data.todayOrders);
+            document.getElementById('cpuCores').textContent = data.availableProcessors;
+
+            // Memory Usage
+            const memPercent = data.memoryUsagePercent.toFixed(1);
+            document.getElementById('memoryUsageText').textContent = `Sử dụng: ${memPercent}%`;
+            document.getElementById('memoryProgressBar').style.width = memPercent + '%';
+            document.getElementById('memoryProgressBar').textContent = memPercent + '%';
+            document.getElementById('memoryProgressBar').className =
+                `progress-bar progress-bar-striped progress-bar-animated ${getProgressBarColor(memPercent)}`;
+            document.getElementById('memoryDetail').textContent =
+                `${formatBytes(data.usedMemory)} / ${formatBytes(data.maxMemory)}`;
+
+            // Disk Usage
+            const diskPercent = data.diskUsagePercent.toFixed(1);
+            document.getElementById('diskUsageText').textContent = `Sử dụng: ${diskPercent}%`;
+            document.getElementById('diskProgressBar').style.width = diskPercent + '%';
+            document.getElementById('diskProgressBar').textContent = diskPercent + '%';
+            document.getElementById('diskProgressBar').className =
+                `progress-bar progress-bar-striped progress-bar-animated ${getProgressBarColor(diskPercent)}`;
+            document.getElementById('diskDetail').textContent =
+                `${formatBytes(data.totalDiskSpace - data.freeDiskSpace)} / ${formatBytes(data.totalDiskSpace)}`;
+
+            // System Info
+            document.getElementById('javaVersion').textContent = data.javaVersion;
+            document.getElementById('osInfo').textContent = `${data.osName} ${data.osVersion}`;
+            document.getElementById('osArch').textContent = data.osArch;
+            document.getElementById('threadInfo').textContent =
+                `${data.threadCount} active (Peak: ${data.peakThreadCount})`;
+
+            // Database Stats
+            if (data.databaseStats) {
+                document.getElementById('dbUsers').textContent = formatNumber(data.databaseStats.users);
+                document.getElementById('dbOrders').textContent = formatNumber(data.databaseStats.orders);
+                document.getElementById('dbProducts').textContent = formatNumber(data.databaseStats.products);
+                document.getElementById('dbPayments').textContent = formatNumber(data.databaseStats.payments);
+                document.getElementById('dbAuditLogs').textContent = formatNumber(data.databaseStats.auditLogs);
+            }
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'HEALTHY': 'success',
+                'WARNING': 'warning',
+                'CRITICAL': 'danger',
+                'ERROR': 'danger'
+            };
+            return colors[status] || 'info';
+        }
+
+        function getProgressBarColor(percent) {
+            if (percent > 90) return 'bg-danger';
+            if (percent > 75) return 'bg-warning';
+            return 'bg-success';
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        }
+
+        function formatUptime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const days = Math.floor(seconds / 86400);
+            const hours = Math.floor((seconds % 86400) / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+
+            if (days > 0) return `${days}d ${hours}h`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('vi-VN').format(num);
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent =
+                `Cập nhật: ${now.toLocaleTimeString('vi-VN')}`;
+        }
+
+        function showError(message) {
+            const alertDiv = document.getElementById('systemStatusAlert');
+            alertDiv.className = 'alert alert-danger';
+            alertDiv.textContent = message;
+            alertDiv.classList.remove('d-none');
+        }
+
+        function logout() {
+            clearAuthData();
+            window.location.href = '/login';
+        }
+
+        // Auto refresh every 30 seconds
+        setInterval(loadSystemHealth, 30000);
+
+        // Load on page load
+        loadSystemHealth();
+    </script>
+</body>
+</html>
+

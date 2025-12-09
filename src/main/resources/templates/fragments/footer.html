@@ -1,0 +1,203 @@
+<!-- Modern Footer Component -->
+<!-- Include this in all pages using: <div th:replace="~{fragments/footer :: footer}"></div> -->
+
+<footer class="footer" th:fragment="footer">
+    <div class="container">
+        <div class="row">
+            <!-- About Section -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <h5><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h5>
+                <p class="text-muted">
+                    Điểm đến lý tưởng cho những tín đồ thời trang.
+                    Chúng tôi mang đến những sản phẩm chất lượng cao với giá cả hợp lý.
+                </p>
+                <div class="social-links mt-3">
+                    <a href="#" class="me-3"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="me-3"><i class="bi bi-instagram fs-5"></i></a>
+                    <a href="#" class="me-3"><i class="bi bi-twitter fs-5"></i></a>
+                    <a href="#" class="me-3"><i class="bi bi-youtube fs-5"></i></a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-6 mb-4">
+                <h5>Về chúng tôi</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="/about">Giới thiệu</a></li>
+                    <li class="mb-2"><a href="/contact">Liên hệ</a></li>
+                    <li class="mb-2"><a href="/stores">Hệ thống cửa hàng</a></li>
+                    <li class="mb-2"><a href="/careers">Tuyển dụng</a></li>
+                </ul>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5>Chăm sóc khách hàng</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="/shipping">Chính sách giao hàng</a></li>
+                    <li class="mb-2"><a href="/returns">Đổi trả hàng</a></li>
+                    <li class="mb-2"><a href="/payment">Thanh toán</a></li>
+                    <li class="mb-2"><a href="/faq">Câu hỏi thường gặp</a></li>
+                    <li class="mb-2"><a href="/privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <h5>Liên hệ</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-geo-alt-fill me-2"></i>
+                        12 Nguyễn Văn Bảo, Phường 4, Gò Vấp, TP.HCM
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-telephone-fill me-2"></i>
+                        <a href="tel:1900123456">1900 123 456</a>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        <a href="mailto:support@fashionshop.vn">support@fashionshop.vn</a>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-clock-fill me-2"></i>
+                        8:00 - 22:00 (Tất cả các ngày)
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Newsletter -->
+        <div class="row mt-4 pt-4 border-top border-secondary">
+            <div class="col-lg-6 mb-3">
+                <h5>Đăng ký nhận tin</h5>
+                <p class="text-muted mb-3">Nhận thông tin về sản phẩm mới và ưu đãi đặc biệt</p>
+                <form class="d-flex gap-2" id="newsletterForm">
+                    <input type="email" class="form-control" placeholder="Nhập email của bạn" required>
+                    <button type="submit" class="btn btn-light text-nowrap">Đăng ký</button>
+                </form>
+            </div>
+            <div class="col-lg-6 mb-3 text-lg-end">
+                <h5>Phương thức thanh toán</h5>
+                <div class="payment-methods mt-3">
+                    <i class="bi bi-credit-card fs-3 me-2"></i>
+                    <i class="bi bi-wallet2 fs-3 me-2"></i>
+                    <i class="bi bi-phone fs-3 me-2"></i>
+                    <img src="/images/momo-icon.png" alt="MoMo" style="height: 30px;" class="me-2" onerror="this.style.display='none'">
+                    <img src="/images/vnpay-icon.png" alt="VNPay" style="height: 30px;" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="row mt-3 pt-3 border-top border-secondary">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0 text-muted">
+                    © <span id="currentYear"></span> Fashion Shop. All rights reserved.
+                </p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <a href="/terms" class="text-muted me-3">Điều khoản sử dụng</a>
+                <a href="/privacy" class="text-muted">Chính sách bảo mật</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+.footer {
+    background-color: #1a1a1a;
+    color: rgba(255,255,255,0.8);
+    padding: 4rem 0 2rem;
+    margin-top: 5rem;
+}
+
+.footer h5 {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.footer a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.footer a:hover {
+    color: white;
+    padding-left: 5px;
+}
+
+.footer .social-links a {
+    color: rgba(255,255,255,0.7);
+    transition: all 0.3s;
+    display: inline-block;
+}
+
+.footer .social-links a:hover {
+    color: white;
+    transform: translateY(-3px);
+    padding-left: 0;
+}
+
+.footer .form-control {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+}
+
+.footer .form-control:focus {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+    box-shadow: none;
+}
+
+.footer .form-control::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+.footer .btn-light {
+    background: white;
+    color: #1a1a1a;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.footer .btn-light:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.footer .border-secondary {
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+.payment-methods {
+    color: rgba(255,255,255,0.7);
+}
+</style>
+
+<script>
+// Set current year
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+// Newsletter form handler
+document.getElementById('newsletterForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = this.querySelector('input[type="email"]').value;
+
+    // Here you would typically send to your backend
+    console.log('Newsletter signup:', email);
+
+    // Show success message
+    alert('Cảm ơn bạn đã đăng ký nhận tin!');
+    this.reset();
+});
+</script>
+
