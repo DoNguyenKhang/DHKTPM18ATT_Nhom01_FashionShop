@@ -1,5 +1,6 @@
 package fit.iuh.edu.fashion.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class CustomerProfile {
     @Column(name = "user_id")
     private Long userId;
 
+    @JsonBackReference("user-customer")
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id")

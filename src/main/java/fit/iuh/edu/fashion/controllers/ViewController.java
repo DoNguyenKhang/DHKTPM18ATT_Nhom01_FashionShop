@@ -11,5 +11,20 @@ public class ViewController {
         return "admin/coupons";
     }
 
+    @GetMapping("/admin/payments")
+    public String adminPayments() {
+        return "admin/payments";
+    }
+
+    @GetMapping("/admin/audit-logs")
+    public String adminAuditLogs() {
+        return "admin/audit-logs";
+    }
+
+    @GetMapping("/admin/system-monitor")
+    public String adminSystemMonitor() {
+        return "admin/system-monitor";
+    }
+
     // Removed duplicate payment mappings - they already exist in WebController
 }

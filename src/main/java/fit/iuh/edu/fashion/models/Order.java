@@ -1,5 +1,6 @@
 package fit.iuh.edu.fashion.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class Order {
     @Column(nullable = false, unique = true, length = 40)
     private String code;
 
+    @JsonIgnoreProperties({"customerProfile", "employeeProfile", "roles", "hibernateLazyInitializer", "handler"})
     @ManyToOne
     @JoinColumn(name = "customer_user_id", nullable = false)
     private User customer;
@@ -83,6 +85,14 @@ public class Order {
     @Column(name = "coupon_code", length = 40)
     private String couponCode;
 
+    @Builder.Default
+    @Column(name = "loyalty_points_used", nullable = false)
+    private Integer loyaltyPointsUsed = 0;
+
+    @Builder.Default
+    @Column(name = "loyalty_points_earned", nullable = false)
+    private Integer loyaltyPointsEarned = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod = PaymentMethod.COD;
@@ -97,6 +107,7 @@ public class Order {
     @Column(name = "payment_time")
     private LocalDateTime paymentTime;
 
+    @JsonIgnoreProperties({"order", "hibernateLazyInitializer", "handler"})
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 

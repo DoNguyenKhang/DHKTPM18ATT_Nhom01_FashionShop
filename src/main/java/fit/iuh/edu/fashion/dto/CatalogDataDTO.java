@@ -72,7 +72,7 @@ public class CatalogDataDTO implements Serializable {
     public String toSystemPrompt() {
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("Bạn là trợ lý mua sắm thời trang chuyên nghiệp của cửa hàng LADOS.\n\n");
+        prompt.append("Bạn là trợ lý mua sắm thời trang chuyên nghiệp của cửa hàng Fashion.\n\n");
 
         prompt.append("⚠️ QUY TẮC BẮT BUỘC PHẢI TUÂN THỦ:\n");
         prompt.append("1. CHỈ được giới thiệu sản phẩm CÓ TRONG DANH SÁCH được cung cấp\n");

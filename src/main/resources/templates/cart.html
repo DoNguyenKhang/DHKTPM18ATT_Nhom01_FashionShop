@@ -6,69 +6,50 @@
     <title>Giỏ hàng - Fashion Shop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/style.css">
     <style>
-        /* Navbar Styles */
-        .navbar-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .navbar-custom .navbar-brand {
-            color: white !important;
-            font-weight: bold;
-            font-size: 1.4rem;
-            transition: transform 0.3s;
-        }
-        .navbar-custom .navbar-brand:hover {
-            transform: scale(1.05);
-        }
-        .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            transition: all 0.3s;
-            border-radius: 5px;
-            margin: 0 0.2rem;
-        }
-        .navbar-custom .nav-link:hover {
-            background: rgba(255,255,255,0.2);
-            color: white !important;
-        }
-        .navbar-custom .nav-link.active {
-            background: rgba(255,255,255,0.25);
-            color: white !important;
-        }
-        .navbar-custom .btn-register {
-            background: white;
-            color: #667eea;
-            font-weight: 600;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            transition: all 0.3s;
-        }
-        .navbar-custom .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
-        }
-        .navbar-custom .dropdown-menu {
-            border: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            border-radius: 10px;
-            margin-top: 0.5rem;
-        }
-        .navbar-custom .dropdown-item {
-            padding: 0.7rem 1.5rem;
-            transition: all 0.3s;
-        }
-        .navbar-custom .dropdown-item:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
         .cart-item-image {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
+            border-radius: 8px;
+        }
+        .cart-item {
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        .cart-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .quantity-controls button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .quantity-controls button:hover {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+        .cart-summary {
+            position: sticky;
+            top: 20px;
         }
     </style>
 </head>
@@ -142,19 +123,19 @@
 
             <!-- Cart Summary -->
             <div class="col-lg-4">
-                <div class="card sticky-top" style="top: 20px;">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                <div class="card cart-summary">
+                    <div class="card-header bg-dark text-white" style="border-radius: 12px 12px 0 0;">
+                        <h5 class="mb-0 text-white"><i class="bi bi-receipt"></i> Tóm tắt đơn hàng</h5>
                     </div>
                     <div class="card-body">
                         <!-- Coupon Code Input -->
                         <div class="mb-3">
-                            <label class="form-label">Mã giảm giá</label>
+                            <label class="form-label fw-bold">Mã giảm giá</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="couponCode"
                                        placeholder="Nhập mã giảm giá"
                                        style="text-transform: uppercase;">
-                                <button class="btn btn-outline-primary" onclick="applyCoupon()" id="applyCouponBtn">
+                                <button class="btn btn-dark" onclick="applyCoupon()" id="applyCouponBtn">
                                     Áp dụng
                                 </button>
                             </div>
@@ -171,6 +152,39 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Loyalty Points Input -->
+                        <div class="mb-3" id="loyaltyPointsSection" style="display: none;">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-star-fill text-warning"></i> Điểm tích lũy
+                            </label>
+                            <div class="alert alert-info p-2 mb-2">
+                                <small>
+                                    Bạn có <strong id="availablePoints">0</strong> điểm
+                                    (= <strong id="pointsValue">0</strong> ₫)
+                                </small>
+                            </div>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="loyaltyPointsToUse"
+                                       placeholder="Nhập số điểm muốn dùng" min="0" max="0">
+                                <button class="btn btn-dark" onclick="applyLoyaltyPoints()" id="applyPointsBtn">
+                                    Sử dụng
+                                </button>
+                            </div>
+                            <small class="text-muted">1 điểm = 1,000 ₫</small>
+                            <div id="loyaltyPointsInfo" class="mt-2" style="display: none;">
+                                <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-0">
+                                    <small>
+                                        <i class="bi bi-check-circle"></i>
+                                        Đã dùng <span id="pointsUsed">0</span> điểm
+                                    </small>
+                                    <button class="btn btn-sm btn-link text-danger p-0" onclick="removeLoyaltyPoints()">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <hr>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tạm tính:</span>
@@ -178,17 +192,21 @@
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Giảm giá:</span>
-                            <strong class="text-danger" id="discount">0 ₫</strong>
+                            <strong class="text-danger" id="discount">-0 ₫</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2" id="loyaltyDiscountRow" style="display: none;">
+                            <span><i class="bi bi-star-fill text-warning"></i> Điểm tích lũy:</span>
+                            <strong class="text-success" id="loyaltyDiscount">-0 ₫</strong>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
-                            <h5>Tổng cộng:</h5>
-                            <h5 class="text-primary" id="total">0 ₫</h5>
+                            <h5 class="mb-0">Tổng cộng:</h5>
+                            <h5 class="mb-0" style="color: #1a1a1a;" id="total">0 ₫</h5>
                         </div>
-                        <button class="btn btn-primary w-100" id="checkoutBtn" onclick="checkout()" disabled>
+                        <button class="btn btn-dark w-100 mb-2" id="checkoutBtn" onclick="checkout()" disabled>
                             <i class="bi bi-credit-card"></i> Thanh toán
                         </button>
-                        <button class="btn btn-outline-danger w-100 mt-2" onclick="clearCart()">
+                        <button class="btn btn-outline-secondary w-100" onclick="clearCart()">
                             <i class="bi bi-trash"></i> Xóa giỏ hàng
                         </button>
                     </div>
@@ -276,6 +294,101 @@
         let cart = null;
         let appliedCoupon = null;
         let calculatedDiscount = 0;
+        let loyaltyPointsUsed = 0;
+        let loyaltyPointsDiscount = 0;
+        let availableLoyaltyPoints = 0;
+
+        // Load cart
+        async function loadCart() {
+            try {
+                const response = await fetchWithAuth('/api/cart');
+                if (response.ok) {
+                    cart = await response.json();
+                    renderCart(cart);
+
+                    // Load loyalty points
+                    await loadLoyaltyPoints();
+                } else {
+                    console.error('Failed to load cart');
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+            }
+        }
+
+        // Load loyalty points from profile
+        async function loadLoyaltyPoints() {
+            try {
+                const response = await fetchWithAuth('/api/profile');
+                if (response.ok) {
+                    const profile = await response.json();
+                    availableLoyaltyPoints = profile.loyaltyPoint || 0;
+
+                    if (availableLoyaltyPoints > 0) {
+                        document.getElementById('loyaltyPointsSection').style.display = 'block';
+                        document.getElementById('availablePoints').textContent = availableLoyaltyPoints.toLocaleString();
+                        document.getElementById('pointsValue').textContent = (availableLoyaltyPoints * 1000).toLocaleString();
+                        document.getElementById('loyaltyPointsToUse').max = availableLoyaltyPoints;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading loyalty points:', error);
+            }
+        }
+
+        // Apply loyalty points
+        function applyLoyaltyPoints() {
+            const pointsToUse = parseInt(document.getElementById('loyaltyPointsToUse').value) || 0;
+
+            if (pointsToUse <= 0) {
+                alert('Vui lòng nhập số điểm hợp lệ');
+                return;
+            }
+
+            if (pointsToUse > availableLoyaltyPoints) {
+                alert('Số điểm nhập vượt quá số điểm có sẵn');
+                return;
+            }
+
+            const maxDiscount = cart.subtotal - calculatedDiscount;
+            const requestedDiscount = pointsToUse * 1000;
+
+            if (requestedDiscount > maxDiscount) {
+                const maxPoints = Math.floor(maxDiscount / 1000);
+                alert(`Số điểm tối đa có thể sử dụng cho đơn hàng này là ${maxPoints} điểm`);
+                return;
+            }
+
+            loyaltyPointsUsed = pointsToUse;
+            loyaltyPointsDiscount = requestedDiscount;
+
+            // Show info
+            document.getElementById('pointsUsed').textContent = loyaltyPointsUsed.toLocaleString();
+            document.getElementById('loyaltyPointsInfo').style.display = 'block';
+            document.getElementById('loyaltyPointsToUse').disabled = true;
+            document.getElementById('applyPointsBtn').style.display = 'none';
+
+            // Update summary
+            const subtotal = cart.subtotal || 0;
+            const total = subtotal - calculatedDiscount - loyaltyPointsDiscount;
+            updateSummary(subtotal, calculatedDiscount, loyaltyPointsDiscount, total);
+        }
+
+        // Remove loyalty points
+        function removeLoyaltyPoints() {
+            loyaltyPointsUsed = 0;
+            loyaltyPointsDiscount = 0;
+
+            document.getElementById('loyaltyPointsToUse').value = '';
+            document.getElementById('loyaltyPointsToUse').disabled = false;
+            document.getElementById('loyaltyPointsInfo').style.display = 'none';
+            document.getElementById('applyPointsBtn').style.display = 'inline-block';
+
+            // Update summary
+            const subtotal = cart.subtotal || 0;
+            const total = subtotal - calculatedDiscount;
+            updateSummary(subtotal, calculatedDiscount, 0, total);
+        }
 
         // Load cart
         async function loadCart() {
@@ -398,17 +511,27 @@
 
             const subtotal = cart.subtotal || 0;
             const discount = appliedCoupon ? calculatedDiscount : 0;
-            const total = subtotal - discount;
+            const loyaltyDiscount = loyaltyPointsDiscount || 0;
+            const total = subtotal - discount - loyaltyDiscount;
 
-            updateSummary(subtotal, discount, total);
+            updateSummary(subtotal, discount, loyaltyDiscount, total);
 
             // Disable checkout button if there are stock issues
             document.getElementById('checkoutBtn').disabled = hasOutOfStock || hasInsufficientStock;
         }
 
-        function updateSummary(subtotal, discount, total) {
+        function updateSummary(subtotal, discount, loyaltyDiscount, total) {
             document.getElementById('subtotal').textContent = formatCurrency(subtotal);
             document.getElementById('discount').textContent = '-' + formatCurrency(discount);
+
+            // Show/hide loyalty discount row
+            if (loyaltyDiscount > 0) {
+                document.getElementById('loyaltyDiscountRow').style.display = 'flex';
+                document.getElementById('loyaltyDiscount').textContent = '-' + formatCurrency(loyaltyDiscount);
+            } else {
+                document.getElementById('loyaltyDiscountRow').style.display = 'none';
+            }
+
             document.getElementById('total').textContent = formatCurrency(total);
         }
 
@@ -464,7 +587,9 @@
                     applyBtn.style.display = 'none';
 
                     // Update summary
-                    updateSummary(cart.subtotal, discount, cart.subtotal - discount);
+                    const subtotal = cart.subtotal;
+                    const total = subtotal - discount - loyaltyPointsDiscount;
+                    updateSummary(subtotal, discount, loyaltyPointsDiscount, total);
                 } else {
                     const error = await response.json();
                     showCouponMessage(error.message || 'Mã giảm giá không hợp lệ', 'danger');
@@ -494,7 +619,7 @@
 
             // Update summary
             if (cart) {
-                updateSummary(cart.subtotal, 0, cart.subtotal);
+                updateSummary(cart.subtotal, 0, loyaltyPointsDiscount, cart.subtotal - loyaltyPointsDiscount);
             }
         }
 
@@ -626,7 +751,8 @@
                 shipCountry: 'Vietnam',
                 note: document.getElementById('orderNote').value,
                 paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
-                couponCode: appliedCoupon ? appliedCoupon.code : ''
+                couponCode: appliedCoupon ? appliedCoupon.code : '',
+                loyaltyPointsToUse: loyaltyPointsUsed
             };
 
             try {

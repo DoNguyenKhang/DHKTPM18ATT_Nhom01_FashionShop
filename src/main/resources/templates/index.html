@@ -3,81 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fashion Shop - Trang chủ</title>
+    <title>Fashion Shop - Thời Trang Hiện Đại</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/navbar.css">
+    <link rel="stylesheet" href="/css/style.css">
     <style>
-        /* Navbar Styles */
-        .navbar-custom {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        /* Hero Banner */
+        .hero-banner {
+            position: relative;
+            height: 600px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
         }
-        .navbar-custom .navbar-brand {
-            color: white !important;
-            font-weight: bold;
-            font-size: 1.4rem;
-            transition: transform 0.3s;
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1600') center/cover;
+            opacity: 0.3;
+            z-index: 0;
         }
-        .navbar-custom .navbar-brand:hover {
-            transform: scale(1.05);
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
         }
-        .navbar-custom .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            transition: all 0.3s;
-            border-radius: 5px;
-            margin: 0 0.2rem;
-        }
-        .navbar-custom .nav-link:hover {
-            background: rgba(255,255,255,0.2);
-            color: white !important;
-        }
-        .navbar-custom .nav-link.active {
-            background: rgba(255,255,255,0.25);
-            color: white !important;
-        }
-        .navbar-custom .btn-register {
-            background: white;
-            color: #667eea;
-            font-weight: 600;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            border-radius: 25px;
-            transition: all 0.3s;
-        }
-        .navbar-custom .btn-register:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
-        }
-        .navbar-custom .dropdown-menu {
-            border: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            border-radius: 10px;
-            margin-top: 0.5rem;
-        }
-        .navbar-custom .dropdown-item {
-            padding: 0.7rem 1.5rem;
-            transition: all 0.3s;
-        }
-        .navbar-custom .dropdown-item:hover {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
             color: white;
         }
 
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .hero-content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-content .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            margin: 0 0.5rem;
+        }
+
+        /* Categories Section */
+        .categories-section {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+
+        .category-card {
+            position: relative;
+            height: 350px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+
+        .category-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .category-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .category-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .category-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 2rem;
             color: white;
-            padding: 100px 0;
+        }
+
+        .category-overlay h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #dddddd;
+        }
+
+        /* Featured Products Section */
+        .featured-section {
+            padding: 5rem 0;
+        }
+
+        .section-header {
             text-align: center;
+            margin-bottom: 3.5rem;
         }
-        .feature-card {
-            transition: transform 0.3s;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .feature-card:hover {
-            transform: translateY(-10px);
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* Modern Product Card */
+        .modern-product-card {
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+            height: 100%;
+        }
+
+        .modern-product-card:hover {
+            border-color: #1a1a1a;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+
+        .modern-product-card .product-image-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding-top: 133.33%; /* 3:4 aspect ratio */
+        }
+
+        .modern-product-card .product-image-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .modern-product-card:hover .product-image-wrapper img {
+            transform: scale(1.08);
+        }
+
+        .modern-product-card .product-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 2;
+        }
+
+        .modern-product-card .product-info {
+            padding: 1.5rem;
+        }
+
+        .modern-product-card .product-brand {
+            font-size: 0.85rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .modern-product-card .product-name {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+            min-height: 48px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .modern-product-card .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .modern-product-card .product-price-old {
+            font-size: 1rem;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 4rem 0;
+            background: #f8f9fa;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .feature-item i {
+            font-size: 3rem;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-item h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-item p {
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-banner {
+                height: 500px;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .category-card {
+                height: 250px;
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
@@ -86,13 +263,16 @@
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-bag-heart-fill"></i> Fashion Shop
+                <i class="bi bi-bag-heart-fill"></i> FASHION SHOP
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center">
+                <!-- Left Navigation -->
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="/">
                             <i class="bi bi-house-door"></i> Trang chủ
@@ -100,44 +280,83 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/products">
-                            <i class="bi bi-box-seam"></i> Sản phẩm
+                            <i class="bi bi-grid"></i> Sản phẩm
                         </a>
                     </li>
-                    <li class="nav-item" id="userMenu" style="display: none;">
-                        <a class="nav-link" href="/cart">
-                            <i class="bi bi-cart3"></i> Giỏ hàng
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-tags"></i> Danh mục
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/products?category=nam"><i class="bi bi-person"></i> Thời trang Nam</a></li>
+                            <li><a class="dropdown-item" href="/products?category=nu"><i class="bi bi-person-dress"></i> Thời trang Nữ</a></li>
+                            <li><a class="dropdown-item" href="/products?category=tre-em"><i class="bi bi-stars"></i> Trẻ em</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/products?sale=true"><i class="bi bi-percent"></i> Sale</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Right Navigation -->
+                <ul class="navbar-nav align-items-lg-center">
+                    <!-- Cart (User Only) -->
+                    <li class="nav-item" id="cartNav" style="display: none;">
+                        <a class="nav-link position-relative" href="/cart">
+                            <i class="bi bi-bag"></i> Giỏ hàng
+                            <span class="badge" id="cartCount" style="display: none;">0</span>
                         </a>
                     </li>
+
+                    <!-- Orders (User Only) -->
+                    <li class="nav-item" id="ordersNav" style="display: none;">
+                        <a class="nav-link" href="/orders">
+                            <i class="bi bi-receipt"></i> Đơn hàng
+                        </a>
+                    </li>
+
+                    <!-- Dashboard (Admin/Staff Only) -->
                     <li class="nav-item" id="adminMenu" style="display: none;">
                         <a class="nav-link" href="/dashboard">
                             <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
                     </li>
+
+                    <!-- Login Button -->
                     <li class="nav-item" id="loginMenu">
-                        <a class="nav-link" href="/login">
+                        <a class="nav-link btn-login" href="/login">
                             <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
                         </a>
                     </li>
-                    <li class="nav-item" id="registerMenu">
+
+                    <!-- Register Button -->
+                    <li class="nav-item ms-2" id="registerMenu">
                         <a class="nav-link btn-register" href="/register">
                             <i class="bi bi-person-plus"></i> Đăng ký
                         </a>
                     </li>
+
+                    <!-- User Dropdown -->
                     <li class="nav-item dropdown" id="userDropdown" style="display: none;">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> <span id="userName"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/profile">
-                                <i class="bi bi-person-badge"></i> Thông tin cá nhân
-                            </a></li>
-                            <li><a class="dropdown-item" href="/orders">
-                                <i class="bi bi-bag-check"></i> Đơn hàng của tôi
-                            </a></li>
+                            <li>
+                                <a class="dropdown-item" href="/profile">
+                                    <i class="bi bi-person-badge"></i> Thông tin cá nhân
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/orders">
+                                    <i class="bi bi-bag-check"></i> Đơn hàng của tôi
+                                </a>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#" onclick="logout()">
-                                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                            </a></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="logout(); return false;">
+                                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -145,65 +364,201 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="container">
-            <h1 class="display-3 fw-bold mb-4">Chào mừng đến Fashion Shop</h1>
-            <p class="lead mb-4">Khám phá bộ sưu tập thời trang mới nhất</p>
-            <a href="/products" class="btn btn-light btn-lg">
-                <i class="bi bi-bag"></i> Mua sắm ngay
-            </a>
-            <!-- AI Chatbot Button -->
-            <a href="/ai-chatbot" target="_blank" class="btn btn-primary btn-lg ">
-                <i class="bi bi-robot"></i> Mở AI Chatbot
-            </a>
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+        <div class="hero-content">
+            <h1>Thời Trang Hiện Đại</h1>
+            <p>Khám phá xu hướng mới nhất - Phong cách riêng của bạn</p>
+            <div>
+                <a href="/products" class="btn btn-light btn-lg">
+                    <i class="bi bi-bag"></i> Mua sắm ngay
+                </a>
+                <a href="/ai-chatbot" target="_blank" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-robot"></i> AI Chatbot
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Features -->
-    <div class="container my-5">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card feature-card p-4 text-center">
-                    <i class="bi bi-truck" style="font-size: 3rem; color: #667eea;"></i>
-                    <h5 class="mt-3">Giao hàng nhanh</h5>
-                    <p>Miễn phí ship cho đơn hàng trên 500K</p>
-                </div>
+    <!-- Categories Section -->
+    <div class="categories-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Danh Mục Sản Phẩm</h2>
+                <p>Chọn phong cách của bạn</p>
             </div>
-            <div class="col-md-4">
-                <div class="card feature-card p-4 text-center">
-                    <i class="bi bi-arrow-repeat" style="font-size: 3rem; color: #667eea;"></i>
-                    <h5 class="mt-3">Đổi trả dễ dàng</h5>
-                    <p>Đổi trả trong vòng 7 ngày</p>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <a href="/products?category=nam" class="text-decoration-none">
+                        <div class="category-card">
+                            <img src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?w=600" alt="Thời trang Nam">
+                            <div class="category-overlay">
+                                <h3>Thời Trang Nam</h3>
+                                <p>Lịch lãm & Hiện đại</p>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card feature-card p-4 text-center">
-                    <i class="bi bi-shield-check" style="font-size: 3rem; color: #667eea;"></i>
-                    <h5 class="mt-3">Thanh toán an toàn</h5>
-                    <p>Bảo mật thông tin 100%</p>
+                <div class="col-md-4">
+                    <a href="/products?category=nu" class="text-decoration-none">
+                        <div class="category-card">
+                            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600" alt="Thời trang Nữ">
+                            <div class="category-overlay">
+                                <h3>Thời Trang Nữ</h3>
+                                <p>Quyến rũ & Thanh lịch</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/products?sale=true" class="text-decoration-none">
+                        <div class="category-card">
+                            <img src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=600" alt="Sale">
+                            <div class="category-overlay">
+                                <h3>SALE UP TO 50%</h3>
+                                <p>Ưu đãi đặc biệt</p>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Featured Products -->
-    <div class="container my-5">
-        <h2 class="text-center mb-4">Sản phẩm nổi bật</h2>
-        <div id="featuredProducts" class="row g-4">
-            <div class="col-12 text-center">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p>Đang tải sản phẩm...</p>
+    <div class="featured-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Sản Phẩm Nổi Bật</h2>
+                <p>Khám phá những sản phẩm được yêu thích nhất</p>
+            </div>
+            <div id="featuredProducts" class="row g-4">
+                <div class="col-12 text-center">
+                    <div class="spinner-border text-dark" role="status"></div>
+                    <p class="mt-3">Đang tải sản phẩm...</p>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a href="/products" class="btn btn-dark btn-lg px-5">
+                    Xem tất cả sản phẩm <i class="bi bi-arrow-right ms-2"></i>
+                </a>
             </div>
         </div>
-        <div class="text-center mt-4">
-            <a href="/products" class="btn btn-primary btn-lg">Xem tất cả sản phẩm</a>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <i class="bi bi-truck"></i>
+                        <h4>Giao Hàng Miễn Phí</h4>
+                        <p>Miễn phí vận chuyển cho đơn hàng trên 500.000đ</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <h4>Đổi Trả Dễ Dàng</h4>
+                        <p>Đổi trả miễn phí trong vòng 30 ngày</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-item">
+                        <i class="bi bi-shield-check"></i>
+                        <h4>Thanh Toán An Toàn</h4>
+                        <p>Bảo mật thông tin 100% với công nghệ mã hóa</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5><i class="bi bi-bag-heart-fill"></i> Fashion Shop</h5>
+                    <p class="text-muted">
+                        Điểm đến lý tưởng cho những tín đồ thời trang.
+                        Chúng tôi mang đến những sản phẩm chất lượng cao với giá cả hợp lý.
+                    </p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="me-3"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="#" class="me-3"><i class="bi bi-instagram fs-5"></i></a>
+                        <a href="#" class="me-3"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="#" class="me-3"><i class="bi bi-youtube fs-5"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Về chúng tôi</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/about">Giới thiệu</a></li>
+                        <li class="mb-2"><a href="/contact">Liên hệ</a></li>
+                        <li class="mb-2"><a href="/stores">Hệ thống cửa hàng</a></li>
+                        <li class="mb-2"><a href="/careers">Tuyển dụng</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Chăm sóc khách hàng</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/shipping">Chính sách giao hàng</a></li>
+                        <li class="mb-2"><a href="/returns">Đổi trả hàng</a></li>
+                        <li class="mb-2"><a href="/payment">Thanh toán</a></li>
+                        <li class="mb-2"><a href="/faq">Câu hỏi thường gặp</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Liên hệ</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-geo-alt-fill me-2"></i>
+                            12 Nguyễn Văn Bảo, Gò Vấp, TP.HCM
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-telephone-fill me-2"></i>
+                            <a href="tel:1900123456">1900 123 456</a>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-envelope-fill me-2"></i>
+                            <a href="mailto:support@fashionshop.vn">support@fashionshop.vn</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row mt-3 pt-3 border-top border-secondary">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-muted">
+                        © 2025 Fashion Shop. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="/terms" class="text-muted me-3">Điều khoản sử dụng</a>
+                    <a href="/privacy" class="text-muted">Chính sách bảo mật</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/auth.js"></script>
     <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-custom');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
         // Check if user is logged in and update navigation
         function updateNavigation() {
             const user = getUser();
@@ -213,15 +568,42 @@
                 document.getElementById('registerMenu').style.display = 'none';
 
                 // Show user menu
-                document.getElementById('userMenu').style.display = 'block';
                 document.getElementById('userDropdown').style.display = 'block';
-                document.getElementById('userName').textContent = user.fullName || user.username;
+                document.getElementById('userName').textContent = user.fullName || user.email;
 
-                // Show admin menu if user is admin
-                if (user.roles && user.roles.includes('ADMIN')) {
+                // Show user specific menus
+                if (user.role === 'USER') {
+                    document.getElementById('cartNav').style.display = 'block';
+                    document.getElementById('ordersNav').style.display = 'block';
+                    updateCartCount();
+                }
+
+                // Show Dashboard menu for Admin and all Staff roles
+                if (isAdmin() || isStaff()) {
                     document.getElementById('adminMenu').style.display = 'block';
                 }
             }
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const cartCountEl = document.getElementById('cartCount');
+            if (cart.length > 0) {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCountEl.textContent = totalItems;
+                cartCountEl.style.display = 'inline';
+            } else {
+                cartCountEl.style.display = 'none';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart');
+            window.location.href = '/';
         }
 
         // Load featured products
@@ -254,7 +636,7 @@
             container.innerHTML = products.map(product => {
                 const imageUrl = product.images && product.images.length > 0
                     ? product.images[0].url
-                    : 'https://via.placeholder.com/300x400?text=No+Image';
+                    : 'https://via.placeholder.com/400x533?text=No+Image';
 
                 // Get price and stock from variants
                 let price = 0;
@@ -263,7 +645,6 @@
                 let hasStock = false;
 
                 if (product.variants && product.variants.length > 0) {
-                    // Calculate total stock from all active variants
                     product.variants.forEach(v => {
                         if (v.isActive && v.stock) {
                             totalStock += v.stock;
@@ -271,7 +652,6 @@
                     });
                     hasStock = totalStock > 0;
 
-                    // Find price range from active variants
                     const activePrices = product.variants
                         .filter(v => v.isActive && v.price)
                         .map(v => parseFloat(v.price));
@@ -287,7 +667,6 @@
                         }
                     }
 
-                    // Check for sale price
                     const variantWithCompare = product.variants.find(v => v.compareAtPrice);
                     if (variantWithCompare) {
                         compareAtPrice = parseFloat(variantWithCompare.compareAtPrice);
@@ -296,44 +675,33 @@
                     price = 'Liên hệ';
                 }
 
-                // Determine stock status badge
-                let stockBadge = '';
+                // Badge display
+                let badge = '';
                 if (!product.isActive) {
-                    stockBadge = '<span class="badge bg-secondary mb-2"><i class="bi bi-x-circle"></i> Ngừng bán</span>';
-                } else if (!hasStock || totalStock === 0) {
-                    stockBadge = '<span class="badge bg-danger mb-2"><i class="bi bi-x-circle"></i> Hết hàng</span>';
-                } else if (totalStock < 10) {
-                    stockBadge = `<span class="badge bg-warning text-dark mb-2"><i class="bi bi-exclamation-triangle"></i> Còn ${totalStock}</span>`;
-                } else {
-                    stockBadge = `<span class="badge bg-success mb-2"><i class="bi bi-check-circle"></i> Còn hàng</span>`;
+                    badge = '<span class="badge bg-secondary">Ngừng bán</span>';
+                } else if (!hasStock) {
+                    badge = '<span class="badge bg-danger">Hết hàng</span>';
+                } else if (compareAtPrice) {
+                    const discount = Math.round((1 - (parseFloat(price) / compareAtPrice)) * 100);
+                    badge = `<span class="badge bg-danger">-${discount}%</span>`;
                 }
 
                 return `
-                    <div class="col-md-4 col-lg-2">
-                        <div class="card h-100 feature-card">
-                            <div class="position-relative">
-                                <img src="${imageUrl}" class="card-img-top" alt="${product.name}"
-                                     style="height: 200px; object-fit: cover;"
-                                     onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'">
-                                ${compareAtPrice ? '<span class="badge bg-danger position-absolute top-0 end-0 m-2">SALE</span>' : ''}
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="modern-product-card">
+                            <div class="product-image-wrapper">
+                                ${badge ? `<div class="product-badge">${badge}</div>` : ''}
+                                <img src="${imageUrl}" alt="${product.name}"
+                                     onerror="this.src='https://via.placeholder.com/400x533?text=No+Image'">
                             </div>
-                            <div class="card-body">
-                                <h6 class="card-title text-truncate" title="${product.name}">${product.name}</h6>
-                                ${product.brand ? `<small class="text-muted mb-2"><i class="bi bi-tag"></i> ${product.brand.name}</small>` : ''}
-
-                                <!-- Stock Status -->
-                                <div class="mt-2">
-                                    ${stockBadge}
+                            <div class="product-info">
+                                ${product.brand ? `<div class="product-brand">${product.brand.name}</div>` : ''}
+                                <div class="product-name">${product.name}</div>
+                                <div>
+                                    ${compareAtPrice ? `<span class="product-price-old">${formatCurrency(compareAtPrice)}</span>` : ''}
+                                    <div class="product-price">${typeof price === 'string' ? price : formatCurrency(price)}</div>
                                 </div>
-
-                                <!-- Price -->
-                                <div class="mt-2">
-                                    ${compareAtPrice ? `<p class="text-muted mb-1"><small><del>${formatCurrency(compareAtPrice)}</del></small></p>` : ''}
-                                    <p class="text-primary fw-bold mb-2">${typeof price === 'string' ? price : formatCurrency(price)}</p>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-white border-0">
-                                <a href="/products/${product.slug}" class="btn btn-sm btn-outline-primary w-100" ${!hasStock || !product.isActive ? 'disabled' : ''}>
+                                <a href="/products/${product.slug}" class="btn btn-dark btn-sm w-100 mt-3" ${!hasStock || !product.isActive ? 'disabled' : ''}>
                                     <i class="bi bi-eye"></i> Xem chi tiết
                                 </a>
                             </div>

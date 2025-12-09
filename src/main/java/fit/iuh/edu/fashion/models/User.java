@@ -1,5 +1,7 @@
 package fit.iuh.edu.fashion.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -52,11 +54,14 @@ public class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Set<Role> roles = new HashSet<>();
 
+    @JsonManagedReference("user-employee")
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private EmployeeProfile employeeProfile;
 
+    @JsonManagedReference("user-customer")
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private CustomerProfile customerProfile;
 

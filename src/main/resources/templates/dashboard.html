@@ -7,10 +7,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .stat-card {
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #1a1a1a;
             transition: transform 0.2s;
         }
         .stat-card:hover {
@@ -18,7 +19,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         .revenue-card {
-            border-left-color: #28a745;
+            border-left-color: #27ae60;
         }
         .chart-container {
             position: relative;
@@ -39,34 +40,52 @@
         </div>
 
         <div class="user-info" id="userInfo">
-            <small class="user-role">Admin</small>
+            <small class="user-role" id="userRole">Đang tải...</small>
             <div class="user-name">Đang tải...</div>
         </div>
 
         <nav>
-            <a href="/dashboard" class="active">
+            <!-- Dashboard - For ADMIN and ALL STAFF -->
+            <a href="/dashboard" id="menu-dashboard" class="active">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
 
-            <div class="nav-section-title">QUẢN LÝ</div>
+            <div class="nav-section-title" id="nav-section-manage">QUẢN LÝ</div>
 
-            <a href="/admin/products">
+            <!-- Product Management - For ADMIN and STAFF_PRODUCT -->
+            <a href="/admin/products" id="menu-products">
                 <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
             </a>
-            <a href="/admin/categories">
+            <a href="/admin/categories" id="menu-categories">
                 <i class="bi bi-grid"></i> Quản lý Danh mục
             </a>
-            <a href="/admin/brands">
+            <a href="/admin/brands" id="menu-brands">
                 <i class="bi bi-tags"></i> Quản lý Thương hiệu
             </a>
-            <a href="/admin/orders">
+
+            <!-- Order Management - For ADMIN and STAFF_SALES -->
+            <a href="/admin/orders" id="menu-orders">
                 <i class="bi bi-cart-check"></i> Quản lý Đơn hàng
             </a>
-            <a href="/admin/coupons">
+
+            <!-- Payment Management - For ADMIN and STAFF_SALES -->
+            <a href="/admin/payments" id="menu-payments">
+                <i class="bi bi-credit-card"></i> Quản lý Thanh toán
+            </a>
+
+            <!-- Coupon Management - For ADMIN and STAFF_SALES -->
+            <a href="/admin/coupons" id="menu-coupons">
                 <i class="bi bi-tag"></i> Quản lý Mã giảm giá
             </a>
-            <a href="/admin/users">
+
+            <!-- User Management - For ADMIN only -->
+            <a href="/admin/users" id="menu-users">
                 <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+
+            <!-- Audit Logs - For ADMIN only -->
+            <a href="/admin/audit-logs" id="menu-audit-logs">
+                <i class="bi bi-file-text"></i> Nhật ký hoạt động
             </a>
 
             <hr>
@@ -287,33 +306,18 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="row mb-4">
+        <div class="row mb-4" id="quickActionsSection">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-white">
                         <h5 class="mb-0"><i class="bi bi-lightning-fill"></i> Thao tác nhanh</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <a href="/admin/products" class="btn btn-primary w-100">
-                                    <i class="bi bi-plus-circle"></i> Thêm sản phẩm mới
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="/admin/categories" class="btn btn-success w-100">
-                                    <i class="bi bi-plus-circle"></i> Thêm danh mục
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="/admin/brands" class="btn btn-info w-100">
-                                    <i class="bi bi-plus-circle"></i> Thêm thương hiệu
-                                </a>
-                            </div>
-                            <div class="col-md-3">
-                                <a href="/admin/orders" class="btn btn-warning w-100">
-                                    <i class="bi bi-eye"></i> Xem đơn hàng
-                                </a>
+                        <div class="row g-3" id="quickActionsRow">
+                            <!-- Quick actions will be rendered here based on role -->
+                            <div class="col-12 text-center">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                <small class="text-muted ms-2">Đang tải...</small>
                             </div>
                         </div>
                     </div>
@@ -434,17 +438,130 @@
         const user = getUser();
         console.log('User:', user);
         if (user) {
+            // Determine role badge color and icon
+            let badgeColor = 'primary';
+            let roleIcon = 'person-fill';
+
+            if (isAdmin()) {
+                badgeColor = 'danger';
+                roleIcon = 'shield-fill-check';
+            } else if (isStaffProduct()) {
+                badgeColor = 'success';
+                roleIcon = 'box-seam-fill';
+            } else if (isStaffSales()) {
+                badgeColor = 'info';
+                roleIcon = 'cart-check-fill';
+            } else if (isCustomer()) {
+                badgeColor = 'warning';
+                roleIcon = 'person-badge-fill';
+            }
+
+            // Update user info display
             document.getElementById('userInfo').innerHTML = `
                 <div class="d-flex align-items-center">
                     <div class="bg-white rounded-circle p-2 me-2">
-                        <i class="bi bi-person-fill text-primary"></i>
+                        <i class="bi bi-${roleIcon} text-${badgeColor}"></i>
                     </div>
                     <div>
-                        <strong>${user.fullName || user.username}</strong><br>
-                        <small class="text-white-50">${user.email || 'Admin'}</small>
+                        <strong class="text-white">${user.fullName || user.username}</strong><br>
+                        <small class="text-white-50 d-block">${user.email || ''}</small>
+                        <span class="badge bg-${badgeColor} mt-1">
+                            <i class="bi bi-${roleIcon}"></i> ${getUserRoleDisplay()}
+                        </span>
                     </div>
                 </div>
             `;
+
+            // Control menu visibility based on roles
+            updateMenuVisibility();
+
+            // Render quick actions based on role
+            renderQuickActions();
+        }
+
+        // Function to render quick actions based on user role
+        function renderQuickActions() {
+            const quickActionsRow = document.getElementById('quickActionsRow');
+            let actions = [];
+
+            if (isAdmin()) {
+                // Admin có tất cả actions
+                actions = [
+                    { href: '/admin/products', icon: 'plus-circle', text: 'Thêm sản phẩm', color: 'primary' },
+                    { href: '/admin/categories', icon: 'plus-circle', text: 'Thêm danh mục', color: 'success' },
+                    { href: '/admin/brands', icon: 'plus-circle', text: 'Thêm thương hiệu', color: 'info' },
+                    { href: '/admin/orders', icon: 'eye', text: 'Xem đơn hàng', color: 'warning' },
+                    { href: '/admin/coupons', icon: 'tag', text: 'Mã giảm giá', color: 'secondary' },
+                    { href: '/admin/users', icon: 'people', text: 'Quản lý người dùng', color: 'dark' }
+                ];
+            } else if (isStaffProduct()) {
+                // Staff Product chỉ có actions liên quan sản phẩm
+                actions = [
+                    { href: '/admin/products', icon: 'plus-circle', text: 'Thêm sản phẩm', color: 'primary' },
+                    { href: '/admin/categories', icon: 'plus-circle', text: 'Thêm danh mục', color: 'success' },
+                    { href: '/admin/brands', icon: 'plus-circle', text: 'Thêm thương hiệu', color: 'info' },
+                    { href: '/admin/products', icon: 'box-seam', text: 'Quản lý sản phẩm', color: 'primary' }
+                ];
+            } else if (isStaffSales()) {
+                // Staff Sales chỉ có actions liên quan đơn hàng
+                actions = [
+                    { href: '/admin/orders', icon: 'eye', text: 'Xem đơn hàng', color: 'warning' },
+                    { href: '/admin/orders', icon: 'cart-check', text: 'Quản lý đơn hàng', color: 'primary' },
+                    { href: '/admin/coupons', icon: 'tag', text: 'Mã giảm giá', color: 'secondary' },
+                    { href: '/admin/orders', icon: 'graph-up', text: 'Báo cáo doanh thu', color: 'success' }
+                ];
+            } else {
+                // Customer không có quick actions
+                actions = [];
+            }
+
+            // Render actions
+            if (actions.length > 0) {
+                quickActionsRow.innerHTML = actions.map(action => `
+                    <div class="col-md-3">
+                        <a href="${action.href}" class="btn btn-${action.color} w-100">
+                            <i class="bi bi-${action.icon}"></i> ${action.text}
+                        </a>
+                    </div>
+                `).join('');
+            } else {
+                quickActionsRow.innerHTML = '<div class="col-12"><p class="text-muted text-center mb-0">Không có thao tác nhanh</p></div>';
+            }
+        }
+
+        // Function to control menu visibility based on user roles
+        function updateMenuVisibility() {
+            // Dashboard - Always visible for ADMIN and ALL STAFF
+            const canAccessDashboard = isAdmin() || isStaff();
+            if (document.getElementById('menu-dashboard')) {
+                document.getElementById('menu-dashboard').style.display = canAccessDashboard ? 'block' : 'none';
+            }
+
+            // Product management menus - ADMIN and STAFF_PRODUCT
+            const canManageProducts = isAdmin() || isStaffProduct();
+            document.getElementById('menu-products').style.display = canManageProducts ? 'block' : 'none';
+            document.getElementById('menu-categories').style.display = canManageProducts ? 'block' : 'none';
+            document.getElementById('menu-brands').style.display = canManageProducts ? 'block' : 'none';
+
+            // Order and coupon management - ADMIN and STAFF_SALES
+            const canManageOrders = isAdmin() || isStaffSales();
+            document.getElementById('menu-orders').style.display = canManageOrders ? 'block' : 'none';
+            if (document.getElementById('menu-payments')) {
+                document.getElementById('menu-payments').style.display = canManageOrders ? 'block' : 'none';
+            }
+            document.getElementById('menu-coupons').style.display = canManageOrders ? 'block' : 'none';
+
+            // User management - ADMIN only
+            document.getElementById('menu-users').style.display = isAdmin() ? 'block' : 'none';
+
+            // Audit logs - ADMIN only
+            document.getElementById('menu-audit-logs').style.display = isAdmin() ? 'block' : 'none';
+
+            // Hide "QUẢN LÝ" section if no management menus are visible
+            const hasAnyManagementMenu = canManageProducts || canManageOrders || isAdmin();
+            if (document.getElementById('nav-section-manage')) {
+                document.getElementById('nav-section-manage').style.display = hasAnyManagementMenu ? 'block' : 'none';
+            }
         }
 
         // Update time
@@ -466,110 +583,153 @@
         async function loadDashboardData() {
             console.log('Loading dashboard data...');
             try {
-                // Load products count
-                console.log('Fetching products...');
-                const productsResponse = await fetchWithAuth('/api/products?size=100');
-                console.log('Products response:', productsResponse.status);
-                if (productsResponse.ok) {
-                    const productsData = await productsResponse.json();
-                    console.log('Products data:', productsData);
-                    const products = productsData.content || productsData || [];
-                    document.getElementById('totalProducts').textContent = productsData.totalElements || products.length || 0;
+                // Check permissions
+                const canViewProducts = isAdmin() || isStaffProduct();
+                const canViewOrders = isAdmin() || isStaffSales();
 
-                    // Show recent products (first 5)
-                    const recentProducts = products.slice(0, 5);
-                    const productsHtml = recentProducts.length > 0
-                        ? recentProducts.map(p => {
-                            // Get price from first variant or show N/A
-                            let price = 'N/A';
-                            if (p.variants && p.variants.length > 0) {
-                                price = formatCurrency(p.variants[0].price);
-                            }
-                            return `
-                            <tr>
-                                <td><small>${p.name}</small></td>
-                                <td><small>${price}</small></td>
-                                <td><span class="badge bg-${p.isActive ? 'success' : 'secondary'} badge-sm">${p.isActive ? 'Hoạt động' : 'Ngừng'}</span></td>
-                            </tr>
-                        `}).join('')
-                        : '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có sản phẩm</small></td></tr>';
-                    document.getElementById('recentProductsBody').innerHTML = productsHtml;
+                // Helper function to delay between API calls
+                const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+                // Load products count (if permitted)
+                if (canViewProducts) {
+                    console.log('Fetching products...');
+                    try {
+                        const productsResponse = await fetchWithAuth('/api/products?page=0&size=5&sortBy=id&sortDirection=DESC');
+                        console.log('Products response:', productsResponse.status);
+                        if (productsResponse.ok) {
+                            const productsData = await productsResponse.json();
+                            console.log('Products data:', productsData);
+                            document.getElementById('totalProducts').textContent = productsData.totalElements || 0;
+
+                            // Show recent products
+                            const recentProducts = productsData.content || [];
+                            const productsHtml = recentProducts.length > 0
+                                ? recentProducts.map(p => {
+                                    let price = 'N/A';
+                                    if (p.variants && p.variants.length > 0) {
+                                        price = formatCurrency(p.variants[0].price);
+                                    }
+                                    return `
+                                <tr>
+                                    <td><small>${p.name}</small></td>
+                                    <td><small>${price}</small></td>
+                                    <td><span class="badge bg-${p.isActive ? 'success' : 'secondary'} badge-sm">${p.isActive ? 'Hoạt động' : 'Ngừng'}</span></td>
+                                </tr>
+                            `}).join('')
+                                : '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có sản phẩm</small></td></tr>';
+                            document.getElementById('recentProductsBody').innerHTML = productsHtml;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching products:', error);
+                        document.getElementById('totalProducts').textContent = '0';
+                    }
+
+                    await delay(500); // Delay 500ms between requests
                 } else {
-                    console.error('Failed to fetch products:', productsResponse.status);
-                    document.getElementById('totalProducts').textContent = '0';
-                    document.getElementById('recentProductsBody').innerHTML = '<tr><td colspan="3" class="text-center"><small class="text-danger">Không thể tải dữ liệu</small></td></tr>';
+                    document.getElementById('totalProducts').textContent = 'N/A';
+                    document.getElementById('recentProductsBody').innerHTML = '<tr><td colspan="3" class="text-center"><small class="text-muted">Không có quyền xem</small></td></tr>';
                 }
 
-                // Load categories count
-                console.log('Fetching categories...');
-                const categoriesResponse = await fetch('/api/categories');
-                if (categoriesResponse.ok) {
-                    const categories = await categoriesResponse.json();
-                    document.getElementById('totalCategories').textContent = categories.length || 0;
+                // Load categories count (if permitted)
+                if (canViewProducts) {
+                    console.log('Fetching categories...');
+                    try {
+                        const categoriesResponse = await fetch('/api/categories');
+                        if (categoriesResponse.ok) {
+                            const categories = await categoriesResponse.json();
+                            document.getElementById('totalCategories').textContent = categories.length || 0;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching categories:', error);
+                        document.getElementById('totalCategories').textContent = '0';
+                    }
+
+                    await delay(500); // Delay 500ms
                 } else {
-                    document.getElementById('totalCategories').textContent = '0';
+                    document.getElementById('totalCategories').textContent = 'N/A';
                 }
 
-                // Load brands count
-                console.log('Fetching brands...');
-                const brandsResponse = await fetch('/api/brands');
-                if (brandsResponse.ok) {
-                    const brands = await brandsResponse.json();
-                    document.getElementById('totalBrands').textContent = brands.length || 0;
+                // Load brands count (if permitted)
+                if (canViewProducts) {
+                    console.log('Fetching brands...');
+                    try {
+                        const brandsResponse = await fetch('/api/brands');
+                        if (brandsResponse.ok) {
+                            const brands = await brandsResponse.json();
+                            document.getElementById('totalBrands').textContent = brands.length || 0;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching brands:', error);
+                        document.getElementById('totalBrands').textContent = '0';
+                    }
+
+                    await delay(500); // Delay 500ms
                 } else {
-                    document.getElementById('totalBrands').textContent = '0';
+                    document.getElementById('totalBrands').textContent = 'N/A';
                 }
 
-                // Load orders count and revenue statistics
-                console.log('Fetching orders...');
-                const ordersResponse = await fetchWithAuth('/api/orders?size=1000');
-                console.log('Orders response:', ordersResponse.status);
-                if (ordersResponse.ok) {
-                    const ordersData = await ordersResponse.json();
-                    console.log('Orders data:', ordersData);
-                    const orders = ordersData.content || ordersData || [];
-                    document.getElementById('totalOrders').textContent = ordersData.totalElements || orders.length || 0;
+                // Load orders count and revenue statistics (if permitted)
+                if (canViewOrders) {
+                    console.log('Fetching orders...');
+                    try {
+                        const ordersResponse = await fetchWithAuth('/api/orders?page=0&size=100&sortBy=id&sortDirection=DESC');
+                        console.log('Orders response:', ordersResponse.status);
+                        if (ordersResponse.ok) {
+                            const ordersData = await ordersResponse.json();
+                            console.log('Orders data:', ordersData);
+                        const orders = ordersData.content || [];
+                        document.getElementById('totalOrders').textContent = ordersData.totalElements || 0;
 
-                    // Calculate revenue statistics
-                    calculateRevenueStats(orders);
+                        // Calculate revenue statistics
+                        calculateRevenueStats(orders);
 
-                    // Calculate order status statistics
-                    calculateOrderStatusStats(orders);
+                        // Calculate order status statistics
+                        calculateOrderStatusStats(orders);
 
-                    // Create revenue chart
-                    createRevenueChart(orders);
+                        // Create revenue chart
+                        createRevenueChart(orders);
 
-                    // Show recent orders (first 5)
-                    const recentOrders = orders.slice(0, 5);
-                    const ordersHtml = recentOrders.length > 0
-                        ? recentOrders.map(o => {
-                            const statusConfig = getOrderStatusConfig(o.status);
-                            return `
-                            <tr>
-                                <td><small>${o.code}</small></td>
-                                <td><small>${o.shipName}</small></td>
-                                <td><span class="badge ${statusConfig.class} badge-sm">${statusConfig.text}</span></td>
-                            </tr>
-                        `}).join('')
-                        : '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có đơn hàng</small></td></tr>';
-                    document.getElementById('recentOrdersBody').innerHTML = ordersHtml;
-                } else {
-                    console.error('Failed to fetch orders:', ordersResponse.status);
+                        // Show recent orders (first 5)
+                        const recentOrders = orders.slice(0, 5);
+                        const ordersHtml = recentOrders.length > 0
+                            ? recentOrders.map(o => {
+                                const statusConfig = getOrderStatusConfig(o.status);
+                                return `
+                                <tr>
+                                    <td><small>${o.code}</small></td>
+                                    <td><small>${o.shipName}</small></td>
+                                    <td><span class="badge ${statusConfig.class} badge-sm">${statusConfig.text}</span></td>
+                                </tr>
+                            `}).join('')
+                            : '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có đơn hàng</small></td></tr>';
+                        document.getElementById('recentOrdersBody').innerHTML = ordersHtml;
+                    } else {
+                        console.error('Failed to fetch orders:', ordersResponse.status);
+                        document.getElementById('totalOrders').textContent = '0';
+                        setRevenueToZero();
+                    }
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
                     document.getElementById('totalOrders').textContent = '0';
-                    document.getElementById('recentOrdersBody').innerHTML = '<tr><td colspan="3" class="text-center"><small class="text-muted">Chưa có đơn hàng</small></td></tr>';
                     setRevenueToZero();
                 }
-
-                console.log('Dashboard data loaded successfully!');
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-                document.getElementById('totalProducts').textContent = 'Lỗi';
-                document.getElementById('totalCategories').textContent = 'Lỗi';
-                document.getElementById('totalBrands').textContent = 'Lỗi';
-                document.getElementById('totalOrders').textContent = 'Lỗi';
+            } else {
+                // Hide order stats for users without permission
+                document.getElementById('totalOrders').textContent = 'N/A';
+                document.getElementById('recentOrdersBody').innerHTML = '<tr><td colspan="3" class="text-center"><small class="text-muted">Không có quyền xem</small></td></tr>';
                 setRevenueToZero();
             }
+
+            console.log('Dashboard data loaded successfully!');
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            document.getElementById('totalProducts').textContent = 'Lỗi';
+            document.getElementById('totalCategories').textContent = 'Lỗi';
+            document.getElementById('totalBrands').textContent = 'Lỗi';
+            document.getElementById('totalOrders').textContent = 'Lỗi';
+            setRevenueToZero();
         }
+    }
 
         function calculateRevenueStats(orders) {
             const now = new Date();

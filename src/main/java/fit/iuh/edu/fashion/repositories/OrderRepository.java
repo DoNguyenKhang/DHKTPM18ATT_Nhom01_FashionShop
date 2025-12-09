@@ -30,4 +30,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                                      @Param("endDate") LocalDateTime endDate);
 
     List<Order> findByCustomerOrderByPlacedAtDesc(fit.iuh.edu.fashion.models.User customer);
+
+    long countByPlacedAtAfter(LocalDateTime date);
 }

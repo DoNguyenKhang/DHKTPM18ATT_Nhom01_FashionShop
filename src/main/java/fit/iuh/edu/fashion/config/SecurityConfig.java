@@ -71,7 +71,7 @@ public class SecurityConfig {
 
                         // Public web pages
                         .requestMatchers("/", "/login", "/register", "/forgot-password", "/reset-password", "/index", "/products/**", "/dashboard").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/image_product/**", "/static/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/image_product/**", "/static/**", "/favicon.ico").permitAll()
 
                         // Public product viewing
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
@@ -91,6 +91,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/my/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/orders/*/cancel").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_ADMIN")
+
+                        // Profile endpoints - all authenticated users can access their profile
+                        .requestMatchers("/api/profile").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_ADMIN", "ROLE_STAFF_PRODUCT", "ROLE_STAFF_SALES")
+                        .requestMatchers("/api/profile/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_ADMIN", "ROLE_STAFF_PRODUCT", "ROLE_STAFF_SALES")
 
                         // Staff Product endpoints
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STAFF_PRODUCT")

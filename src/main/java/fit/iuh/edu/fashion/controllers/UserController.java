@@ -6,6 +6,8 @@ import fit.iuh.edu.fashion.dto.request.UpdateUserStatusRequest;
 import fit.iuh.edu.fashion.dto.response.UserResponse;
 import fit.iuh.edu.fashion.models.Role;
 import fit.iuh.edu.fashion.models.User;
+import fit.iuh.edu.fashion.repositories.CustomerProfileRepository;
+import fit.iuh.edu.fashion.repositories.EmployeeProfileRepository;
 import fit.iuh.edu.fashion.repositories.RoleRepository;
 import fit.iuh.edu.fashion.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -28,6 +30,8 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final EmployeeProfileRepository employeeProfileRepository;
+    private final CustomerProfileRepository customerProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping
@@ -112,18 +116,67 @@ public class UserController {
 
             // Gán roles
             Set<Role> roles = new HashSet<>();
+            boolean isStaff = false;
+            boolean isCustomer = false;
+
             for (String roleName : request.getRoles()) {
                 Role role = roleRepository.findByCode(roleName)
                         .orElseThrow(() -> new RuntimeException("Role không tồn tại: " + roleName));
                 roles.add(role);
+
+                if (roleName.equals("ADMIN") || roleName.startsWith("STAFF_")) {
+                    isStaff = true;
+                }
+                if (roleName.equals("USER")) {
+                    isCustomer = true;
+                }
             }
             user.setRoles(roles);
+
+            // Tạo profile tương ứng
+            if (isStaff) {
+                // Tạo EmployeeProfile cho nhân viên/admin
+                fit.iuh.edu.fashion.models.EmployeeProfile employeeProfile =
+                    fit.iuh.edu.fashion.models.EmployeeProfile.builder()
+                        .user(user)
+                        .userId(null) // Will be set by @MapsId
+                        .employeeCode(generateEmployeeCode())
+                        .position(getRolePosition(request.getRoles()))
+                        .hireDate(java.time.LocalDate.now())
+                        .build();
+                user.setEmployeeProfile(employeeProfile);
+            } else if (isCustomer) {
+                // Tạo CustomerProfile cho khách hàng
+                fit.iuh.edu.fashion.models.CustomerProfile customerProfile =
+                    fit.iuh.edu.fashion.models.CustomerProfile.builder()
+                        .user(user)
+                        .userId(null) // Will be set by @MapsId
+                        .loyaltyPoint(0)
+                        .build();
+                user.setCustomerProfile(customerProfile);
+            }
 
             User savedUser = userRepository.save(user);
             return ResponseEntity.ok(mapToUserResponse(savedUser));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", "Không thể tạo người dùng: " + e.getMessage()));
         }
+    }
+
+    private String generateEmployeeCode() {
+        String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        return "EMP-" + timestamp;
+    }
+
+    private String getRolePosition(Set<String> roles) {
+        if (roles.contains("ADMIN")) {
+            return "Administrator";
+        } else if (roles.contains("STAFF_PRODUCT")) {
+            return "Product Manager";
+        } else if (roles.contains("STAFF_SALES")) {
+            return "Sales Manager";
+        }
+        return "Staff";
     }
 
     @PutMapping("/{id}")
@@ -151,12 +204,66 @@ public class UserController {
 
             // Cập nhật roles
             Set<Role> roles = new HashSet<>();
+            boolean isStaff = false;
+            boolean isCustomer = false;
+
             for (String roleName : request.getRoles()) {
                 Role role = roleRepository.findByCode(roleName)
                         .orElseThrow(() -> new RuntimeException("Role không tồn tại: " + roleName));
                 roles.add(role);
+
+                if (roleName.equals("ADMIN") || roleName.startsWith("STAFF_")) {
+                    isStaff = true;
+                }
+                if (roleName.equals("USER")) {
+                    isCustomer = true;
+                }
             }
             user.setRoles(roles);
+
+            // Quản lý profile dựa trên role mới
+            if (isStaff) {
+                // Cần EmployeeProfile
+                if (user.getEmployeeProfile() == null) {
+                    // Tạo mới EmployeeProfile
+                    fit.iuh.edu.fashion.models.EmployeeProfile employeeProfile =
+                        fit.iuh.edu.fashion.models.EmployeeProfile.builder()
+                            .user(user)
+                            .userId(user.getId())
+                            .employeeCode(generateEmployeeCode())
+                            .position(getRolePosition(request.getRoles()))
+                            .hireDate(java.time.LocalDate.now())
+                            .build();
+                    user.setEmployeeProfile(employeeProfile);
+                } else {
+                    // Cập nhật position nếu đã có
+                    user.getEmployeeProfile().setPosition(getRolePosition(request.getRoles()));
+                }
+
+                // Xóa CustomerProfile nếu có (chuyển từ USER sang STAFF)
+                if (user.getCustomerProfile() != null) {
+                    customerProfileRepository.delete(user.getCustomerProfile());
+                    user.setCustomerProfile(null);
+                }
+            } else if (isCustomer) {
+                // Cần CustomerProfile
+                if (user.getCustomerProfile() == null) {
+                    // Tạo mới CustomerProfile
+                    fit.iuh.edu.fashion.models.CustomerProfile customerProfile =
+                        fit.iuh.edu.fashion.models.CustomerProfile.builder()
+                            .user(user)
+                            .userId(user.getId())
+                            .loyaltyPoint(0)
+                            .build();
+                    user.setCustomerProfile(customerProfile);
+                }
+
+                // Xóa EmployeeProfile nếu có (chuyển từ STAFF sang USER)
+                if (user.getEmployeeProfile() != null) {
+                    employeeProfileRepository.delete(user.getEmployeeProfile());
+                    user.setEmployeeProfile(null);
+                }
+            }
 
             User updatedUser = userRepository.save(user);
             return ResponseEntity.ok(mapToUserResponse(updatedUser));

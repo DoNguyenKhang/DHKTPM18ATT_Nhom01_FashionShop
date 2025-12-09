@@ -50,6 +50,8 @@ public class OrderRequest {
     @Pattern(regexp = "^$|^[A-Z0-9]{4,40}$", message = "Invalid coupon code format")
     private String couponCode; // Optional - null or empty means no coupon (^$ allows empty string)
 
+    private Integer loyaltyPointsToUse = 0; // Số điểm tích lũy khách hàng muốn sử dụng
+
     @Size(max = 500, message = "Note must not exceed 500 characters")
     private String note;
 

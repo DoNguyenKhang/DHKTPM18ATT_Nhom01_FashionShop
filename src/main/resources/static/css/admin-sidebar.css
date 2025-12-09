@@ -7,7 +7,7 @@ body {
 /* Sidebar Container */
 .admin-sidebar {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
     color: white;
     position: fixed;
     width: 260px;
@@ -33,6 +33,7 @@ body {
 
 .admin-sidebar .sidebar-header h4 i {
     margin-right: 8px;
+    color: #e74c3c;
 }
 
 /* User Info */

@@ -13,6 +13,7 @@ import fit.iuh.edu.fashion.repositories.*;
 import fit.iuh.edu.fashion.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -151,21 +153,37 @@ public class AuthService {
 
     @Transactional
     public AuthResponse refreshToken(String refreshToken) {
+        // Validate token format and signature
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            log.warn("Refresh token is null or empty");
+            throw new BadCredentialsException("Refresh token is required");
+        }
+
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+            log.warn("Refresh token validation failed");
+            throw new BadCredentialsException("Invalid or expired refresh token");
         }
 
         String email = jwtTokenProvider.extractUsername(refreshToken);
+        log.debug("Refreshing token for user: {}", email);
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> {
+                    log.warn("User not found for email: {}", email);
+                    return new BadCredentialsException("User not found for refresh token");
+                });
 
         // Verify refresh token exists in database
         RefreshToken storedToken = refreshTokenRepository.findByTokenAndUser(refreshToken, user)
-                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+                .orElseThrow(() -> {
+                    log.warn("Refresh token not found in database for user: {}", email);
+                    return new BadCredentialsException("Refresh token not found or already used");
+                });
 
         if (storedToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            log.warn("Refresh token expired for user: {}", email);
             refreshTokenRepository.delete(storedToken);
-            throw new RuntimeException("Refresh token expired");
+            throw new BadCredentialsException("Refresh token has expired");
         }
 
         // Generate new tokens
@@ -174,7 +192,10 @@ public class AuthService {
 
         // Delete old refresh token and save new one
         refreshTokenRepository.delete(storedToken);
+        refreshTokenRepository.flush(); // Ensure delete is committed before insert
         saveRefreshToken(user, newRefreshToken);
+
+        log.info("Token refreshed successfully for user: {}", email);
 
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
@@ -279,12 +300,17 @@ public class AuthService {
     }
 
     private void saveRefreshToken(User user, String token) {
+        // Delete any existing refresh tokens for this user to prevent duplicates
+        refreshTokenRepository.deleteByUser(user);
+        refreshTokenRepository.flush();
+
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(token)
                 .user(user)
                 .expiresAt(LocalDateTime.now().plusDays(7))
                 .build();
         refreshTokenRepository.save(refreshToken);
+        log.debug("Saved new refresh token for user: {}", user.getEmail());
     }
 
     private UserResponse mapToUserResponse(User user) {

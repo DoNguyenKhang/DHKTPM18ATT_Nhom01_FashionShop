@@ -36,6 +36,8 @@ public class OrderResponse {
     private String shipCountry;
 
     private String couponCode;
+    private Integer loyaltyPointsUsed;
+    private Integer loyaltyPointsEarned;
     private String paymentMethod;
     private String paymentStatus;
     private String paymentTransactionId;

@@ -108,7 +108,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error("Unauthorized")
-                .message("Invalid username or password")
+                .message(ex.getMessage() != null ? ex.getMessage() : "Invalid credentials")
                 .path(request.getDescription(false).replace("uri=", ""))
                 .build();
 

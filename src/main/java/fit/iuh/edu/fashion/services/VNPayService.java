@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -31,6 +32,7 @@ public class VNPayService {
     private final VNPayConfig vnPayConfig;
     private final OrderRepository orderRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final PaymentService paymentService;
 
     public String createPaymentUrl(Order order, HttpServletRequest request) throws UnsupportedEncodingException {
         String vnp_Version = vnPayConfig.getVersion();
@@ -234,7 +236,7 @@ public class VNPayService {
             String rawData = mapper.writeValueAsString(params);
 
             String vnpAmountStr = params.get("vnp_Amount");
-            BigDecimal amount = new BigDecimal(vnpAmountStr).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP);
+            BigDecimal amount = new BigDecimal(vnpAmountStr).divide(new BigDecimal(100), 2, RoundingMode.HALF_UP);
 
             String responseCode = params.get("vnp_ResponseCode");
             PaymentTransaction.TransactionStatus status;
@@ -268,6 +270,13 @@ public class VNPayService {
             paymentTransactionRepository.save(transaction);
             log.info("Saved payment transaction for order: {}, type: {}, status: {}",
                     order.getCode(), transactionType, status);
+
+            // Tạo bản ghi Payment từ PaymentTransaction
+            try {
+                paymentService.createPaymentFromTransaction(transaction);
+            } catch (Exception e) {
+                log.error("Failed to create payment record from transaction, but transaction was saved", e);
+            }
         } catch (Exception e) {
             log.error("Failed to save payment transaction for order: {}", order.getCode(), e);
         }

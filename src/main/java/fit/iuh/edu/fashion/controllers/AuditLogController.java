@@ -34,6 +34,15 @@ public class AuditLogController {
         return ResponseEntity.ok(auditLogs);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ResponseEntity<AuditLogResponse> getAuditLogById(@PathVariable Long id) {
+        return auditLogRepository.findById(id)
+                .map(this::mapToResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/by-user/{username}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<Page<AuditLogResponse>> getAuditLogsByUser(

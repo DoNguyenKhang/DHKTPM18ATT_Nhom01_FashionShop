@@ -1,5 +1,6 @@
 package fit.iuh.edu.fashion.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnoreProperties({"items", "customer", "hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
@@ -54,7 +56,8 @@ public class Payment {
         PENDING,
         COMPLETED,
         FAILED,
-        REFUNDED
+        REFUNDED,
+        CANCELLED  // Thêm status này khi đổi payment method
     }
 
     @PrePersist
